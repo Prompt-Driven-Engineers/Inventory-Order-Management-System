@@ -1,0 +1,28 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node.js (backend)
+backend/node_modules/
+backend/.env
+backend/dist/
+
+# React (frontend)
+order_inventory_management/node_modules/
+order_inventory_management/.next/
+order_inventory_management/dist/
+order_inventory_management/.env.local
+
+# Editor directories and system files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
