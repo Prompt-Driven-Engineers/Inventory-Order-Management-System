@@ -33,9 +33,7 @@ export default function SellerRegister() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const [selectedCountry, setSelectedCountry] = useState("");
-    const [selectedState, setSelectedState] = useState("");
-    const states = countries.find((c) => c.name === selectedCountry)?.states || [];
+    const states = countries.find((c) => c.name === form.Address.Country)?.states || [];
 
     const validateForm = () => {
         console.log('Inside validation');
@@ -114,7 +112,7 @@ export default function SellerRegister() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        console.log(form);
         if (!validateForm()) return; // Stop if validation fails
     
         try {
@@ -129,7 +127,7 @@ export default function SellerRegister() {
             const result = await response.json();
     
             if (!response.ok) {
-                throw new Error(result.message || 'Something went wrong');
+                throw new Error(result.error || 'Something went wrong');
             }
     
             console.log("Registration successful:", result);
@@ -279,8 +277,8 @@ export default function SellerRegister() {
                                         {/* Country Select */}
                                         <label className="block text-sm font-medium text-gray-700">Country</label>
                                         <select
-                                            name="Country"
-                                            value={form.Address.Country || ""}
+                                            name='Country'
+                                            value={form.Address.Country}
                                             onChange={handleChangeAddress}
                                             className="w-full p-3 border rounded-lg"
                                         >
@@ -298,11 +296,11 @@ export default function SellerRegister() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mt-2">State</label>
                                         <select
-                                            name="State"
-                                            value={form.Address.State || ""}
+                                            name='State'
+                                            // value={form.Address.State}
                                             onChange={handleChangeAddress}
                                             className="w-full p-3 border rounded-lg"
-                                            disabled={!form.Address.Country} // Disable state selection if no country is selected
+                                            disabled={!form.Address.Country} // ✅ Disable state selection if no country is selected
                                         >
                                             <option value="">Select State</option>
                                             {states.map((state) => (

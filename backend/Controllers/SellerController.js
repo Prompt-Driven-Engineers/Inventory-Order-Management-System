@@ -10,11 +10,11 @@ const SellerRegister = async (req, res) => {
 
     try {
         const { Name, Email, Phone, Phone2, StoreName, storeDesc, PAN, Address, BankAccount, PasswordHash } = req.body;
-
+        const phone2 = req.body.Phone2.trim() === "" ? null : req.body.Phone2;
         // Step 1: Insert into Users table
         const [userResult] = await connection.query(
             `INSERT INTO users (Name, Email, Phone, Phone2) VALUES (?, ?, ?, ?)`,
-            [Name, Email, Phone, Phone2]
+            [Name, Email, Phone, phone2]
         );
         const UserID = userResult.insertId; // Get generated UserID
 
@@ -46,6 +46,7 @@ const SellerRegister = async (req, res) => {
     } catch (error) {
         await connection.rollback(); // Rollback transaction on error
         connection.release();
+        console.log(error.message);
         res.status(500).json({ error: 'Registration failed', details: error.message });
     }
 };
