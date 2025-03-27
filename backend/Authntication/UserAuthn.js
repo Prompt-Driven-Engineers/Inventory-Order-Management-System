@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const secretKey = 'ar541ju$$n@39';
+require('dotenv').config();
+const secretKey = process.env.SECRET_KEY;
+
 const setUser = ({UserID, Email}) => {
     return jwt.sign(
         {
@@ -16,12 +18,15 @@ const getUser = (token) => {
         return jwt.verify(token, secretKey);
     } catch(error) {
         return null;
-    }
-    
+    } 
 }
 
 const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.cookies.token;
+    if (!token) {
+        console.log('No token');
+        return res.status(403).json({ error: "Unauthorized" });
+    }
     req.user = getUser(token); // Extract user from token
 
     if (!req.user) {

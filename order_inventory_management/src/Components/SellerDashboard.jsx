@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ShoppingBag, PlusCircle } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 export default function SellerDashboard() {
+    const navigate = useNavigate();
     const [seller, setSeller] = useState(null);
     const [stock, setStock] = useState([]);
     const [soldProducts, setSoldProducts] = useState([]);
-    const { UserID } = useParams();
-    console.log("Extracted UserID from URL:", UserID);
 
     useEffect(() => {
-        console.log(UserID);
-        axios.get(`http://localhost:8000/sellers/${UserID}`)
+        // console.log(UserID);
+        axios.get(`http://localhost:8000/sellers/sellerDetails`, {
+            withCredentials: true
+        })
             .then((res) => {
                 setSeller(res.data); // ✅ Store only the response data
                 console.log(res.data); // ✅ Log actual data
@@ -21,7 +22,7 @@ export default function SellerDashboard() {
                 console.error("Error fetching seller:", err);
                 setSeller(null); // Ensure state is handled on error
             });
-    }, [UserID]);
+    }, []);
 
     return (
         <div className="flex min-h-screen">
@@ -82,7 +83,9 @@ export default function SellerDashboard() {
 
                 {/* Add Product Button */}
                 <div className="mt-6">
-                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        onClick={() => navigate('/addProduct')}
+                    >
                         <PlusCircle size={20} /> Add Product
                     </button>
                 </div>

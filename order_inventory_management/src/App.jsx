@@ -4,6 +4,7 @@ import SellerRegister from './Components/SellerRegister';
 import HomePage from './Components/HomePage';
 import SellerLogin from './Components/SellerLogin';
 import SellerDashboard from './Components/SellerDashboard';
+import AddProduct from './Components/AddProductPage';
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
           <Route path='/' element={<HomePage />} />
           <Route path='/sellerReg' element={<SellerRegister />} />
           <Route path='/sellerLog' element={<SellerLogin />} />
-          <Route path='/sellerDash/:UserID' element={<SellerDashboard />} />
+          <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/addProduct' element={<AddProduct />} />
       </Routes>
     </Router>
   );

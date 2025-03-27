@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 
 
+
 export default function SellerLogin() {
 
     const navigate = useNavigate();
@@ -33,7 +34,6 @@ export default function SellerLogin() {
         return Object.keys(newErrors).length === 0; // Returns `true` if no errors
     };
 
-    
 
     const handleChange = (e) => {
         setForm({
@@ -54,7 +54,8 @@ export default function SellerLogin() {
                 body: JSON.stringify(form),
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: "include",
             });
 
             const result = await response.json();
@@ -63,7 +64,7 @@ export default function SellerLogin() {
                 alert(result.error || 'Something went wrong')
             } else {
                 console.log("Login successful:", result);
-                navigate(`/sellerDash/${result.UserID}`);
+                navigate(`/sellerDash`);
                 alert("Login successful!"); // Show success message to the user
             }
 

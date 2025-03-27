@@ -26,3 +26,4 @@ order_inventory_management/.env.local
 *.njsproj
 *.sln
 *.sw?
+.env
