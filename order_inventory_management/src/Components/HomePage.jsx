@@ -9,10 +9,10 @@ export default function
         <h1 className="text-2xl font-bold">Inventory Manager</h1>
         <nav>
           <ul className="flex space-x-4">
-            <li><a href="#" className="hover:underline">Home</a></li>
-            <li><a href="#" className="hover:underline">Products</a></li>
-            <li><a href="/sellerLog" className="hover:underline">Login</a></li>
-            <li><a href="#" className="hover:underline">Settings</a></li>
+            <li><a href="#" className=" hover:bg-black rounded-sm ">Home</a></li>
+            <li><a href="#" className="hover:bg-black rounded-sm">Products</a></li>
+            <li><a href="/sellerLog" className="hover:bg-black rounded-sm">Login</a></li>
+            <li><a href="#" className="hover:bg-black rounded-sm">Settings</a></li>
           </ul>
         </nav>
       </header>

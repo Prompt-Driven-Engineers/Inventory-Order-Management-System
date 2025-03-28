@@ -80,7 +80,8 @@ export default function SellerLogin() {
 
             {/* Header Title */}
             <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Welcome to SecureCart</h2>
-            <p className="text-center text-gray-600 mb-6">Log in to access your account</p>
+            <p className="text-center text-gray-600 mb-2">Log in to access your account as a seller</p>
+            <p className="text-center text-gray-600 mb-6">Are you Customer? <a href='/customerLog' className='font-bold hover:underline hover:text-blue-600'>login</a> here</p>
 
             {/* Render the appropriate form based on the active tab */}
             <div className="p-6 border-t-2 border-gray-200 bg-white rounded-b-lg">
