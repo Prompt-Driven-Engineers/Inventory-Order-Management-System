@@ -4,8 +4,12 @@ import SellerRegister from './Components/SellerRegister';
 import HomePage from './Components/HomePage';
 import SellerLogin from './Components/SellerLogin';
 import SellerDashboard from './Components/SellerDashboard';
+<<<<<<< HEAD
 import CustomerLogin from './Components/CustomerLogin';
 import CustomerRegister from './Components/CustomerRegister';
+=======
+import AddProduct from './Components/AddProductPage';
+>>>>>>> f52cbb93f1e67b2ddb0563bbcae9d1b2e5411839
 
 function App() {
   return (
@@ -15,8 +19,13 @@ function App() {
           <Route path='/sellerReg' element={<SellerRegister />} />
           <Route path='/customerReg' element={<CustomerRegister />} />
           <Route path='/sellerLog' element={<SellerLogin />} />
+<<<<<<< HEAD
           <Route path='/customerLog' element={<CustomerLogin />} />
           <Route path='/sellerDash/:UserID' element={<SellerDashboard />} />
+=======
+          <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/addProduct' element={<AddProduct />} />
+>>>>>>> f52cbb93f1e67b2ddb0563bbcae9d1b2e5411839
       </Routes>
     </Router>
   );

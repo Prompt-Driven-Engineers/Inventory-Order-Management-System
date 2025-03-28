@@ -1,11 +1,12 @@
 const express = require('express');
 const { SellerRegister, SellerLogin, SellerDetails } = require('../Controllers/SellerController');
+const { verifyToken } = require('../Authntication/UserAuthn');
 
 const router = express.Router();
 
 router.post('/sellerReg', SellerRegister);
 router.post('/sellerLogin', SellerLogin);
-router.get('/:userId', SellerDetails);
+router.get('/sellerDetails', verifyToken, SellerDetails);
 // router.get('/venLogout', vendorLogout);
 // router.get('/isVendorLoggedIn', checkIsLoggedin);
 // router.get('/getVendorProducts', GetVendorProducts);

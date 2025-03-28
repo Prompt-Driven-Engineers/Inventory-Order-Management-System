@@ -1,12 +1,13 @@
 const express = require('express');
-const db = require('./db/db_connection');
 const cors = require('cors');
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
 const sellerRouter = require('./Routes/SellerRoutes');
 
 app.use(express.json()); // to parse JSON request body
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); //  Parses form data
 app.use(cors({
     origin: 'http://localhost:5173', // Allow requests from your frontend
