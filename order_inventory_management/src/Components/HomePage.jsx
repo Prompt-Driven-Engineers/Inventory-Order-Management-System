@@ -13,6 +13,7 @@ export default function
             <li><a href="#" className="hover:bg-black rounded-sm">Products</a></li>
             <li><a href="/sellerLog" className="hover:bg-black rounded-sm">Login</a></li>
             <li><a href="#" className="hover:bg-black rounded-sm">Settings</a></li>
+            <li><a href="/adminLog" className="hover:bg-black rounded-sm">admin</a></li>
           </ul>
         </nav>
       </header>

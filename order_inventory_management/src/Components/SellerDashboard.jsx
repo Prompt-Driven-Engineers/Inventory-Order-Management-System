@@ -30,9 +30,12 @@ export default function SellerDashboard() {
             <div className="w-1/5 bg-gray-200 p-6 flex flex-col items-start">
                 {seller ? (
                     <>
-                        <p className="text-gray-700 font-semibold text-lg">{seller.storename}</p>
+                        <p className="text-gray-700 font-semibold text-2xl">{seller.storename}</p>
                         <p className="text-gray-600">{seller.email}</p>
                         <p className="text-gray-600">{seller.phone}</p>
+                        <p className="text-gray-600 mt-10 font-semibold text-lg">Accout Details</p>
+                        <p className="text-gray-600  ">Account no: <span className="text-black font-semibold">{seller.accountno}</span></p>
+                        <p className="text-gray-600 ">IFSC code: <span className="text-black font-semibold">{seller.ifsc}</span></p>
                     </>
                 ) : (
                     <p>Loading seller details...</p> // ✅ Prevents error when seller is null
