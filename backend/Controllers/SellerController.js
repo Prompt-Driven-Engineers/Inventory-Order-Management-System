@@ -51,6 +51,50 @@ const SellerRegister = async (req, res) => {
     }
 };
 
+const AddProduct = async (req, res) => {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction(); // Start transaction
+
+    try {
+        // Extract uploaded image paths
+        const imagePaths = req.files.map(file => `/data/phonephoto/${file.filename}`);
+
+        // Get other form data from request body
+        const { Name, Description, Price, Discount, Category, ProductType, Quantity, Specifications } = req.body;
+
+        // Ensure Specifications is stored as JSON
+        const specificationsJSON = JSON.stringify(Specifications);
+
+        // **Get SellerId from `req.user` instead of frontend**
+        const SellerId = req.user._id;
+
+        // Insert into inventory
+        const [inventoryRslt] = await connection.query(
+            `INSERT INTO inventory (Name, Description, Category, ProductType, Specifications, images)
+             VALUES (?, ?, ?, ?, ?, ?)`, 
+            [Name, Description, Category, ProductType, specificationsJSON, JSON.stringify(imagePaths)]
+        );
+
+        const ProductId = inventoryRslt.insertId; // Get Product ID
+
+        // Insert into sellerinventory
+        await connection.query(
+            `INSERT INTO sellerinventory (ProductID, SellerID, Price, Discount, Quantity, CurrentStock) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [ProductId, SellerId, Price, Discount, Quantity, Quantity]
+        );
+
+        await connection.commit(); // Commit transaction
+        res.status(200).json({ message: "Product added successfully!", productId: ProductId });
+
+    } catch (error) {
+        await connection.rollback(); // Rollback if anything fails
+        res.status(500).json({ error: "Product add failed", details: error.message });
+    } finally {
+        connection.release(); // Ensure the connection is released
+    }
+};
+
 const SellerLogin = async (req, res) => {
     const { Email, Password } = req.body;
     const connection = await pool.getConnection();
@@ -134,4 +178,7 @@ const SellerDetails = async (req, res) => {
 };
 
 
-module.exports = { SellerRegister, SellerLogin, SellerDetails };
+
+
+
+module.exports = { SellerRegister, SellerLogin, SellerDetails, AddProduct };
