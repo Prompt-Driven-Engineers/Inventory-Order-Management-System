@@ -12,6 +12,16 @@ const setUser = ({UserID, Email}) => {
     );
 };
 
+// const setAdmin = ({UserID, AdminId}) => {
+//     return jwt.sign(
+//         {
+//             _id: UserID,
+//             email: Email
+//         },
+//         secretKey
+//     );
+// };
+
 const getUser = (token) => {
     if(!token) return null;
     try {

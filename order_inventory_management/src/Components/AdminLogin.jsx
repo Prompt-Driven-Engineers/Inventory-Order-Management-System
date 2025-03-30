@@ -1,11 +1,81 @@
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+
 export default function AdminLogin() {
+
+    const navigate = useNavigate();
+    const [errors, setErrors] = useState({});
+    const [form, setForm] = useState({
+        AdminId: '',
+        Password: ''
+    });
+
+    const validateForm = () => {
+        console.log('Inside validation');
+        let newErrors = {};
+    
+        if (!/^[ADM]{3}[0-9]{2}[A-Z]{2}[0-9]{2}[A-Z]{2}$/.test(form.AdminId)) newErrors.AdminId = "Enter Valid AdminId";
+        if (!form.AdminId.trim()) newErrors.AdminId = "AdminId is required";
+      
+    
+        // Password validation
+        if (form.Password.length < 6) newErrors.Password = "Password must be at least 6 characters";
+        if (!form.Password.trim()) newErrors.Password = "Password is required";
+    
+        setErrors(newErrors);
+        console.log(errors);
+    
+        return Object.keys(newErrors).length === 0; // Returns `true` if no errors
+    };
+
+
+    const handleChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name] : e.target.value
+        });
+    }
+
+    const handleLogin = async(e) => {
+        e.preventDefault();
+        console.log(form);
+        if (!validateForm()) return; // Stop if validation fails
+        console.log("logging in Admin");
+
+        try{
+            const response = await fetch('http://localhost:8000/admins/adminLogin', {
+                method: 'POST',
+                body: JSON.stringify(form),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: "include",
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                console.log(result.error || 'Something went wrong');
+                alert(result.error || 'Something went wrong')
+            } else {
+                console.log("Login successful:", result);
+                navigate(`/adminDash`);
+                alert("Login successful!"); // Show success message to the user
+            }
+
+        } catch(error) {
+            console.error("Error during Login:", error.message);
+            alert(error.message); // Show error message to the user
+        }
+    };
+
+
     return(
         <>
             <div className="min-h-screen p-6 bg-gray-300">
             <div className="max-w-2xl  flex items-center rounded-l-4xl shadow-2xl mx-auto mt-10 p-3 bg-blue-300">
             <div className="p-4 bg-black rounded-l-3xl flex flex-col items-center ">
                 <h1 className="text-white text-2xl ml-9 " >Welcome to Inventory Managament System</h1>
-                <img src="https://img.freepik.com/free-vector/forgot-password-concept-illustration_114360-1123.jpg?t=st=1743246399~exp=1743249999~hmac=cd93f6c25cca4a6e192cdf56132004043a631685f7236c669dae309ef35ed4a0&w=826" alt="" className=" w-32 h-24 rounded-full"/>
+                <img src="https://img.freepik.com/free-vector/forgot-Password-concept-illustration_114360-1123.jpg?t=st=1743246399~exp=1743249999~hmac=cd93f6c25cca4a6e192cdf56132004043a631685f7236c669dae309ef35ed4a0&w=826" alt="" className=" w-32 h-24 rounded-full"/>
             </div>
             <div className="p-4 rounded-lg border-gray-200  bg-gray-100">
                 <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Admin login</h2>
@@ -13,22 +83,25 @@ export default function AdminLogin() {
                 <div className="div">
                     <form className="space-y-6">
                         <input 
-                        type="text" 
-                        name="email"
-                        placeholder="Enter your email"
-                        className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500"
+                            type="text" 
+                            onChange={handleChange}
+                            name="AdminId"
+                            placeholder="Enter your AdminID"
+                            className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500"
                         />
 
                         <input 
-                        type="password" 
-                        name="password"
-                        placeholder="Enter your password"
+                        type="Password" 
+                        name="Password"
+                        onChange={handleChange}
+                        placeholder="Enter your Password"
                         className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500"
                     
                         />
 
                         <button
                             type="button"
+                            onClick={handleLogin}
                             className="bg-black text-white w-full rounded-lg py-2 px-4 hover:bg-amber-300 hover:text-black hover:border-black border-1"
                             >
                                 Login

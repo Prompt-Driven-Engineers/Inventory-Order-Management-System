@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 const sellerRouter = require('./Routes/SellerRoutes');
+const adminRouter = require('./Routes/AdminRoutes');
 
 app.use(express.json()); // to parse JSON request body
 app.use(cookieParser());
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 
 app.use('/sellers', sellerRouter);
+app.use('/admins', adminRouter);
 
 app.get('/', (req, res) => {
     res.send("Hellow from backend");
