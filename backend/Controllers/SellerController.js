@@ -150,7 +150,7 @@ const SellerDetails = async (req, res) => {
 
     try {
         // Fetch user details directly using pool (no manual connection)
-        const userQuery = `SELECT Name, Email, Phone FROM users WHERE UserID = ?`;
+        const userQuery = `SELECT Name, Email, Phone  FROM users WHERE UserID = ?`;
         const [userResults] = await pool.execute(userQuery, [_id]);
 
         if (userResults.length === 0) {
@@ -158,7 +158,7 @@ const SellerDetails = async (req, res) => {
         }
 
         // Fetch store details
-        const sellerQuery = `SELECT storename FROM sellers WHERE SellerID = ?`;
+        const sellerQuery = `SELECT storename, accountno, ifsc FROM sellers WHERE SellerID = ?`;
         const [sellerResults] = await pool.execute(sellerQuery, [_id]);
 
         // Merge results
@@ -167,6 +167,8 @@ const SellerDetails = async (req, res) => {
             email: userResults[0].Email,
             phone: userResults[0].Phone,
             storename: sellerResults.length > 0 ? sellerResults[0].storename : null,
+            accountno: sellerResults.length > 0 ? sellerResults[0].accountno : null,
+            ifsc: sellerResults.length > 0 ? sellerResults[0].ifsc : null
         };
         
         res.status(200).json(sellerData);
