@@ -10,6 +10,7 @@ lerna-debug.log*
 backend/node_modules/
 backend/.env
 backend/dist/
+backend/data/phonephoto/
 
 # React (frontend)
 order_inventory_management/node_modules/

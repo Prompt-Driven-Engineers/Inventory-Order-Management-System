@@ -11,9 +11,7 @@ function AddProduct() {
         Category: '',
         ProductType: '',
         Quantity: '',
-        Specifications: {
-
-        },
+        Specifications: {},
         images: [], // Array to hold image files
         SellerId: ''
     });
@@ -47,32 +45,28 @@ function AddProduct() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        return;
-        console.log('Form images before FormData:', form.images); 
-        const formData = new FormData(); // Create FormData object
-    
-        // Append form fields to FormData
+        console.log(form);
+        const formData = new FormData();
+
+        // Append all form fields dynamically (except images)
         for (const key in form) {
-            if (key === 'images') {
-                form.images.forEach((file) => {
-                    formData.append('images', file); // Append each image file
-                });
-            } else if (key === 'Specifications') {
-                // Serialize Specifications before appending
-                formData.append('Specifications', JSON.stringify(form[key])); // Ensure it is a string
+            if (key === "images") continue; // Skip images for now
+            if (key === "Specifications") {
+                formData.append(key, JSON.stringify(form[key])); // Convert object to string
             } else {
                 formData.append(key, form[key]); // Append other fields
             }
         }
-    
-        // Log FormData for debugging
-        for (var pair of formData.entries()) {
-            console.log(pair[0]+ ', ' + pair[1]);
-        }
+
+        // Append images separately (for multiple files)
+        form.images.forEach((file) => {
+            formData.append("images", file);
+        });
     
         const response = await fetch('http://localhost:8000/sellers/addProduct', {
             method: 'POST',
-            body: formData // Use FormData as the body
+            body: formData, // Use FormData as the body
+            credentials: 'include'
         });
         
         const result = await response.json();
@@ -105,7 +99,7 @@ function AddProduct() {
                     <label className="block text-sm font-medium text-gray-700">Product Name</label>
                     <input 
                         type="text" 
-                        name="name" 
+                        name="Name" 
                         placeholder="Enter product name" 
                         onChange={handleChange} 
                         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
