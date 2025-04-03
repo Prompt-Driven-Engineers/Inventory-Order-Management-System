@@ -9,6 +9,10 @@ import CustomerRegister from './Components/CustomerRegister';
 import AddProduct from './Components/AddProductPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
+import AdminRegistration from './Components/AdminRegistration';
+import AdminDetails from './Components/AdminDetails';
+import ModifyAdmin from './Components/ModifyAdmin';
+import SellerList from './Components/SellerList';
 
 function App() {
   return (
@@ -23,8 +27,13 @@ function App() {
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/allSellerDetails' element={<SellerList />} />
+
+          <Route path='/adminReg' element={<AdminRegistration />} />
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/adminDash' element={<AdminDashboard />} />
+          <Route path='/adminList' element={<AdminDetails />} />
+          <Route path='/modAdmin' element={<ModifyAdmin />} />
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
       </Routes>

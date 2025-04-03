@@ -1,14 +1,16 @@
 const express = require('express');
-const { AdminLogin, AdminDetails } = require('../Controllers/AdminController');
+const { AdminLogin, AdminDetails, AdminRegister, AdminList, AdminListMod, ModifyRole, ModifyStatus } = require('../Controllers/AdminController');
 const { verifyToken } = require('../Authntication/UserAuthn');
 const upload = require('../db/Upload');
 
 const router = express.Router();
 
-// router.post('/sellerReg', SellerRegister);
+router.post('/adminReg', verifyToken, AdminRegister);
 router.post('/adminLogin', AdminLogin);
 router.get('/adminDetails', verifyToken, AdminDetails);
-// router.get('/sellerDetails', verifyToken, SellerDetails);
-// router.post("/addProduct", verifyToken, upload.array("images", 5), AddProduct);
+router.get('/adminList', verifyToken, AdminList);
+router.get('/adminListMod', verifyToken, AdminListMod);
+router.put('/modRole', verifyToken, ModifyRole);
+router.put('/modStatus', verifyToken, ModifyStatus);
 
 module.exports = router;
