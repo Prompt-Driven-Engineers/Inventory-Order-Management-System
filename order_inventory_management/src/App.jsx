@@ -9,6 +9,7 @@ import CustomerRegister from './Components/CustomerRegister';
 import AddProduct from './Components/AddProductPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
+import WHMlogin from './Components/WHMlogin';
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
           <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/adminDash' element={<AdminDashboard />} />
+          <Route path='/whmlog' element={<WHMlogin />} />
+
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
       </Routes>
