@@ -13,6 +13,7 @@ import AdminRegistration from './Components/AdminRegistration';
 import AdminDetails from './Components/AdminDetails';
 import ModifyAdmin from './Components/ModifyAdmin';
 import SellerList from './Components/SellerList';
+import WHMlogin from './Components/WHMlogin';
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
+          <Route path='/whmlog' element={<WHMlogin />} />
+
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
       </Routes>

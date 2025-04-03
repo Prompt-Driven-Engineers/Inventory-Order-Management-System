@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-export default function 
-() {
+export default function HomePage() {
+  const [showDropdown, setShowDropdown] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col w-full">
       {/* Header */}
@@ -9,11 +10,25 @@ export default function
         <h1 className="text-2xl font-bold">Inventory Manager</h1>
         <nav>
           <ul className="flex space-x-4">
-            <li><a href="#" className=" hover:bg-black rounded-sm ">Home</a></li>
-            <li><a href="#" className="hover:bg-black rounded-sm">Products</a></li>
-            <li><a href="/sellerLog" className="hover:bg-black rounded-sm">Login</a></li>
-            <li><a href="#" className="hover:bg-black rounded-sm">Settings</a></li>
-            <li><a href="/adminLog" className="hover:bg-black rounded-sm">admin</a></li>
+            <li><a href="#" className="hover:bg-black rounded-sm px-2">Home</a></li>
+            <li><a href="#" className="hover:bg-black rounded-sm px-2">Products</a></li>
+            <li className="relative">
+              <button 
+                className="hover:bg-black rounded-sm px-2" 
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                Login
+              </button>
+              {showDropdown && (
+                <ul className="absolute flex flex-col items-center bg-gray-200 text-black shadow-lg rounded-lg p-3 mt-2 w-30">
+                  <li><a href="/adminLog" className="block px-4 py-2 hover:bg-black hover:text-white hover:rounded-lg">Admin</a></li>
+                  <li><a href="/sellerLog" className="block px-4 py-2 hover:bg-black hover:text-white hover:rounded-lg">Seller</a></li>
+                  <li><a href="/customerLog" className="block px-4 py-2 hover:bg-black hover:text-white hover:rounded-lg">Customer</a></li>
+                  <li><a href="/whmlog" className="block px-4 py-2 hover:bg-black hover:text-white hover:rounded-lg">WareHouse Manager</a></li>
+                </ul>
+              )}
+            </li>
+            <li><a href="#" className="hover:bg-black rounded-sm px-2">Settings</a></li>
           </ul>
         </nav>
       </header>
@@ -61,5 +76,5 @@ export default function
         <p>&copy; 2025 Inventory Manager. All rights reserved.</p>
       </footer>
     </div>
-  )
+  );
 }
