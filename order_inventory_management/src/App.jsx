@@ -10,6 +10,7 @@ import AddProduct from './Components/AddProductPage';
 import AdminLogin from './Components/AdminLogin';
 import AdminDashboard from './Components/AdminDashboard';
 import WHMlogin from './Components/WHMlogin';
+import WHMDashBoard from './Components/WHMDashBoard';
 
 function App() {
   return (
@@ -23,10 +24,13 @@ function App() {
           {/* login paths */}
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
-          <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/adminLog' element={<AdminLogin />} />
-          <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/whmlog' element={<WHMlogin />} />
+
+          {/* DashBoards */}
+          <Route path='/adminDash' element={<AdminDashboard />} />
+          <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/whmDash' element={<WHMDashBoard />} />
 
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
