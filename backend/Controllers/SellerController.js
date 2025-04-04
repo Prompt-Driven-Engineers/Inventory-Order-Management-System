@@ -16,13 +16,19 @@ const SellerRegister = async (req, res) => {
         );
         const UserID = userResult.insertId; // Get generated UserID
 
-        // Step 2: Insert into Sellers table
+        // Step 2: Insert into UserTypes table
+        await connection.query(
+            `INSERT INTO usertypes (UserID, UserType) VALUES (?, ?)`,
+            [UserID, "Seller"]
+        );
+
+        // Step 3: Insert into Sellers table
         await connection.query(
             `INSERT INTO sellers (SellerID, StoreName, StoreDetails, PAN, AccountNo, IFSC) VALUES (?, ?, ?, ?, ?, ?)`,
             [UserID, StoreName, storeDesc, PAN, BankAccount.AccountNo, BankAccount.IFSC]
         );
 
-        // Step 3: Insert into Addresses table
+        // Step 4: Insert into Addresses table
         await connection.query(
             `INSERT INTO address (UserID, Landmark, Street, City, State, Country, ZIP, AddressType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [UserID, Address.Landmark, Address.Street, Address.City, Address.State, Address.Country, Address.ZIP, Address.AddressType]
@@ -30,7 +36,7 @@ const SellerRegister = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(PasswordHash, 10);
 
-        // Step 4: Insert into Passwords table
+        // Step 5: Insert into Passwords table
         await connection.query(
             `INSERT INTO userpasswords (UserID, PasswordHash) VALUES (?, ?)`,
             [UserID, hashedPassword]
@@ -150,6 +156,15 @@ const AddProduct = async (req, res) => {
         // **Get SellerId from `req.user` instead of frontend**
         const SellerId = req.user._id;
 
+        const [sellerRslt] = await connection.query(
+            `SELECT UserType FROM usertypes WHERE UserID = ?`,
+            [SellerId]  // Make sure to pass SellerId inside an array as it's a query parameter
+        );
+
+        if (sellerRslt.length === 0 || sellerRslt[0].UserType !== "Seller") {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
         // Insert into inventory
         const [inventoryRslt] = await connection.query(
             `INSERT INTO inventory (Name, Description, Category, ProductType, Specifications, images)
@@ -177,4 +192,83 @@ const AddProduct = async (req, res) => {
     }
 };
 
-module.exports = { SellerRegister, SellerLogin, SellerDetails, AddProduct };
+const AdminDetails = async (req, res) => {
+    const { _id, Email } = req.user;
+
+    try {
+        // Fetch user details directly using pool (no manual connection)
+        const userQuery = `SELECT Name, Email, Phone  FROM users WHERE UserID = ?`;
+        const [userResults] = await pool.execute(userQuery, [_id]);
+
+        if (userResults.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Fetch store details
+        const adminQuery = `SELECT Role FROM admins WHERE UserID = ?`;
+        const [adminResults] = await pool.execute(adminQuery, [_id]);
+
+        // Merge results
+        const adminData = {
+            name: userResults[0].Name,  
+            email: userResults[0].Email,
+            phone: userResults[0].Phone,
+            Role: adminResults[0].Role
+        };
+        
+        res.status(200).json(adminData);
+        
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).json({ error: "Failed to fetch", details: error.message });
+    }
+};
+
+const SellerList = async (req, res) => {
+    const { _id, email } = req.user;
+    
+    try {
+        // Get role of the logged-in user
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (!adminRows.length || adminRows[0].Role !== "SuperAdmin" || adminRows[0].Role !== "Seller Administrator") {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Get list of all sellers
+        const [sellers] = await pool.query(
+            'SELECT * FROM sellers'
+        );
+
+        // Extract UserIDs from the sellers table
+        const userIds = sellers.map(seller => seller.SellerID);
+        if (userIds.length === 0) {
+            return res.status(200).json({ sellers: [] });
+        }
+
+        // Fetch user details for those UserIDs
+        const [userDetails] = await pool.query(
+            `SELECT UserID, Name, Email, Phone, CreatedAt, LastLogin 
+             FROM users 
+             WHERE UserID IN (?)`,
+            [userIds]
+        );
+
+        // Merge admin and user details
+        const sellerList = sellers.map(seller => {
+            const user = userDetails.find(user => user.UserID === seller.SellerID);
+            return { ...seller, ...user };
+        });
+
+        res.status(200).json({ sellers: sellerList });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch seller list" });
+    }
+};
+
+module.exports = { SellerRegister, SellerLogin, SellerDetails, AddProduct, SellerList };

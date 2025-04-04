@@ -6,22 +6,20 @@ import axios from "axios";
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const [admin, setAdmin] = useState(null);
-    const [stock, setStock] = useState([]);
-    const [soldProducts, setSoldProducts] = useState([]);
 
     useEffect(() => {
         // console.log(UserID);
         axios.get(`http://localhost:8000/admins/adminDetails`, {
             withCredentials: true
         })
-            .then((res) => {
-                setAdmin(res.data); // ✅ Store only the response data
-                console.log(res.data); // ✅ Log actual data
-            })
-            .catch((err) => {
-                console.error("Error fetching admin:", err);
-                setAdmin(null); // Ensure state is handled on error
-            });
+        .then((res) => {
+            setAdmin(res.data); // Store only the response data
+            console.log(res.data); // Log actual data
+        })
+        .catch((err) => {
+            console.error("Error fetching admin:", err);
+            setAdmin(null); // Ensure state is handled on error
+        });
     }, []);
 
     return (
@@ -38,7 +36,7 @@ export default function AdminDashboard() {
                         {/* <p className="text-gray-600 ">Permission: <span className="text-black font-semibold">{admin.permission}</span></p> */}
                     </>
                 ) : (
-                    <p>Loading admin details...</p> // ✅ Prevents error when admin is null
+                    <p>Loading admin details...</p> // Prevents error when admin is null
                 )}
             </div>
 
@@ -48,50 +46,115 @@ export default function AdminDashboard() {
                 : <h1 className="text-2xl font-bold">Welcome, </h1>
                 }
 
-                {/* Stock Section */}
-                {/* <div className="mt-6 bg-white p-4 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <ShoppingBag size={20} /> Your Stock
-                    </h2>
-                    <ul className="mt-3">
-                        {stock.length > 0 ? (
-                            stock.map((product, index) => (
-                                <li key={index} className="border-b py-2">
-                                    {product.name} - {product.quantity} pcs
-                                </li>
-                            ))
-                        ) : (
-                            <p className="text-gray-500">No products in stock</p>
-                        )}
-                    </ul>
-                </div> */}
-
-                {/* Sold Products Section */}
-                {/* <div className="mt-6 bg-white p-4 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <ShoppingBag size={20} /> Sold Products
-                    </h2>
-                    <ul className="mt-3">
-                        {soldProducts.length > 0 ? (
-                            soldProducts.map((product, index) => (
-                                <li key={index} className="border-b py-2">
-                                    {product.name} - {product.quantity} sold
-                                </li>
-                            ))
-                        ) : (
-                            <p className="text-gray-500">No products sold yet</p>
-                        )}
-                    </ul>
-                </div> */}
-
                 {/* Add Admins Button */}
-                <div className="mt-6">
-                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                        onClick={() => navigate('/')}
-                    >
-                        <PlusCircle size={20} /> Add Admins
-                    </button>
-                </div>
+                {admin?.Role === "SuperAdmin" && (
+                    <div className="mt-6">
+                        <div>
+                            <h1>Admin Management</h1>
+                            <div className="flex justify-around">
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => navigate('/adminReg')}
+                                >
+                                    <PlusCircle size={20} /> Add New Admin
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => navigate('/adminList')}
+                                >
+                                    View Admin Details
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => navigate('/modAdmin')}
+                                >
+                                    Manage Admin
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h1>Seller Management</h1>
+                            <div className="flex justify-around">
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Pending Sellers
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => navigate('/allSellerDetails')}
+                                >
+                                    View Seller Details
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Modify Seller
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h1>User Management</h1>
+                            <div className="flex justify-around">
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    View User List
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Modify User
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h1>Product Management</h1>
+                            <div className="flex justify-around">
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    View All Products
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Remove Product
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Categorize Product
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h1>Order Management</h1>
+                            <div className="flex justify-around">
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    View All Orders
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Cancel Order
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                )}
             </div>
         </div>
     );
