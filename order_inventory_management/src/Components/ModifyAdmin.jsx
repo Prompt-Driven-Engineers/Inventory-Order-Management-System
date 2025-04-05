@@ -82,7 +82,7 @@ export default function ModifyAdmin() {
                     {/* Account Status Dropdown */}
                     <select 
                         onChange={(e) => {
-                            if(admin.Role !== e.target.value) handleStatusChange(admin.AdminID, e.target.value);
+                            if(admin.AccountStatus !== e.target.value) handleStatusChange(admin.AdminID, e.target.value);
                         }}
                         defaultValue={admin.AccountStatus}
                         className="border p-2 rounded"

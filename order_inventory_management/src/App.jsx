@@ -15,6 +15,7 @@ import ModifyAdmin from './Components/ModifyAdmin';
 import SellerList from './Components/SellerList';
 import WHMlogin from './Components/WHMlogin';
 import WHMDashBoard from './Components/WHMDashBoard';
+import PendingSellersList from './Components/PendingSellersList';
 
 function App() {
   return (
@@ -28,18 +29,16 @@ function App() {
           {/* login paths */}
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
-<<<<<<< HEAD
           <Route path='/adminLog' element={<AdminLogin />} />
-=======
           <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
+          <Route path='/pendingSellers' element={<PendingSellersList />} />
 
           <Route path='/adminReg' element={<AdminRegistration />} />
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
->>>>>>> abb7742d2d9eeae808eba2a75ce9056b9fc1a917
           <Route path='/whmlog' element={<WHMlogin />} />
 
           {/* DashBoards */}
