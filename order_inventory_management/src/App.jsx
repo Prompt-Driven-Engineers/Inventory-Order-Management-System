@@ -24,26 +24,23 @@ function App() {
           {/* register paths */}
           <Route path='/sellerReg' element={<SellerRegister />} />
           <Route path='/customerReg' element={<CustomerRegister />} />
+          <Route path='/adminReg' element={<AdminRegistration />} />
 
           {/* login paths */}
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
-<<<<<<< HEAD
           <Route path='/adminLog' element={<AdminLogin />} />
-=======
-          <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
 
-          <Route path='/adminReg' element={<AdminRegistration />} />
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
->>>>>>> abb7742d2d9eeae808eba2a75ce9056b9fc1a917
           <Route path='/whmlog' element={<WHMlogin />} />
 
           {/* DashBoards */}
           <Route path='/adminDash' element={<AdminDashboard />} />
+          <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/whmDash' element={<WHMDashBoard />} />
 
