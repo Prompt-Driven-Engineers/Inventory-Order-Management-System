@@ -18,6 +18,7 @@ app.use(cors({
 
 app.use('/sellers', sellerRouter);
 app.use('/admins', adminRouter);
+// app.use('/products', productRouter);
 
 app.get('/', (req, res) => {
     res.send("Hellow from backend");

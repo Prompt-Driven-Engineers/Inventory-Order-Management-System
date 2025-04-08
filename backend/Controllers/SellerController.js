@@ -192,38 +192,6 @@ const AddProduct = async (req, res) => {
     }
 };
 
-const AdminDetails = async (req, res) => {
-    const { _id, Email } = req.user;
-
-    try {
-        // Fetch user details directly using pool (no manual connection)
-        const userQuery = `SELECT Name, Email, Phone  FROM users WHERE UserID = ?`;
-        const [userResults] = await pool.execute(userQuery, [_id]);
-
-        if (userResults.length === 0) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Fetch store details
-        const adminQuery = `SELECT Role FROM admins WHERE UserID = ?`;
-        const [adminResults] = await pool.execute(adminQuery, [_id]);
-
-        // Merge results
-        const adminData = {
-            name: userResults[0].Name,  
-            email: userResults[0].Email,
-            phone: userResults[0].Phone,
-            Role: adminResults[0].Role
-        };
-        
-        res.status(200).json(adminData);
-        
-    } catch (error) {
-        console.error("Database Error:", error);
-        res.status(500).json({ error: "Failed to fetch", details: error.message });
-    }
-};
-
 const SellerList = async (req, res) => {
     const { _id, email } = req.user;
     
@@ -234,7 +202,8 @@ const SellerList = async (req, res) => {
             [_id]
         );
 
-        if (!adminRows.length || adminRows[0].Role !== "SuperAdmin" || adminRows[0].Role !== "Seller Administrator") {
+        if (adminRows.length === 0 || 
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -271,4 +240,91 @@ const SellerList = async (req, res) => {
     }
 };
 
-module.exports = { SellerRegister, SellerLogin, SellerDetails, AddProduct, SellerList };
+const PendingSellers = async (req, res) => {
+    const { _id, email } = req.user;
+    
+    try {
+        // Get role of the logged-in user
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (adminRows.length === 0 || 
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Get list of all sellers
+        const [sellers] = await pool.query(
+            'SELECT * FROM sellers WHERE Status = ?',
+            'Pending'
+        );
+
+        // Extract UserIDs from the sellers table
+        const userIds = sellers.map(seller => seller.SellerID);
+        if (userIds.length === 0) {
+            return res.status(200).json({ sellers: [] });
+        }
+
+        // Fetch user details for those UserIDs
+        const [userDetails] = await pool.query(
+            `SELECT UserID, Name, Email, Phone, CreatedAt, LastLogin 
+             FROM users 
+             WHERE UserID IN (?)`,
+            [userIds]
+        );
+
+        // Merge admin and user details
+        const sellerList = sellers.map(seller => {
+            const user = userDetails.find(user => user.UserID === seller.SellerID);
+            return { ...seller, ...user };
+        });
+
+        res.status(200).json({ sellers: sellerList });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch seller list" });
+    }
+};
+
+const ModifySellerStatus = async (req, res) => {
+    const { _id } = req.user;
+    const { SellerID, newStatus } = req.body; // Receiving AdminID and new Role from frontend
+
+    try {
+        // Get role of the logged-in user
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (adminRows.length === 0 || 
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Update role where AdminID matches
+        await pool.query(
+            'UPDATE sellers SET Status = ? WHERE SellerID = ?',
+            [newStatus, SellerID]
+        );
+
+        res.status(200).json({ message: "Sellers status updated successfully" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to update Sellers status" });
+    }
+};
+
+module.exports = 
+{   SellerRegister, 
+    SellerLogin,
+    SellerDetails, 
+    AddProduct, 
+    SellerList, 
+    PendingSellers,
+    ModifySellerStatus,
+};

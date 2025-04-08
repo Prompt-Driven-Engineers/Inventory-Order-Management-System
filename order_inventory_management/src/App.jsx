@@ -15,6 +15,7 @@ import ModifyAdmin from './Components/ModifyAdmin';
 import SellerList from './Components/SellerList';
 import WHMlogin from './Components/WHMlogin';
 import WHMDashBoard from './Components/WHMDashBoard';
+import PendingSellersList from './Components/PendingSellersList';
 
 function App() {
   return (
@@ -30,7 +31,9 @@ function App() {
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
           <Route path='/adminLog' element={<AdminLogin />} />
+          <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
+          <Route path='/pendingSellers' element={<PendingSellersList />} />
 
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/adminDash' element={<AdminDashboard />} />

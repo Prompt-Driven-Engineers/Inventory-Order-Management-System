@@ -77,21 +77,15 @@ export default function AdminDashboard() {
                             <div className="flex justify-around">
                                 <button
                                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                                    onClick={() => {}}
+                                    onClick={() => navigate('/pendingSellers')}
                                 >
-                                    Pending Sellers
+                                    Manage Sellers
                                 </button>
                                 <button
                                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                                     onClick={() => navigate('/allSellerDetails')}
                                 >
                                     View Seller Details
-                                </button>
-                                <button
-                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                                    onClick={() => {}}
-                                >
-                                    Modify Seller
                                 </button>
                             </div>
                         </div>
@@ -117,7 +111,7 @@ export default function AdminDashboard() {
                             <div className="flex justify-around">
                                 <button
                                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                                    onClick={() => {}}
+                                    onClick={() => navigate('/allProducts')}
                                 >
                                     View All Products
                                 </button>
@@ -126,6 +120,12 @@ export default function AdminDashboard() {
                                     onClick={() => {}}
                                 >
                                     Remove Product
+                                </button>
+                                <button
+                                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => {}}
+                                >
+                                    Seller Inventory
                                 </button>
                                 <button
                                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
