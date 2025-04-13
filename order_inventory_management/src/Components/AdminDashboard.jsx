@@ -111,7 +111,7 @@ export default function AdminDashboard() {
                             <div className="flex justify-around">
                                 <button
                                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                                    onClick={() => navigate('/allProducts')}
+                                    onClick={() => navigate('/allProduct')}
                                 >
                                     View All Products
                                 </button>

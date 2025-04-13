@@ -6,6 +6,8 @@ const app = express();
 
 const sellerRouter = require('./Routes/SellerRoutes');
 const adminRouter = require('./Routes/AdminRoutes');
+const productRouter = require('./Routes/ProductRoutes');
+const customerRouter = require('./Routes/CustomerRoutes');
 
 app.use(express.json()); // to parse JSON request body
 app.use(cookieParser());
@@ -18,7 +20,8 @@ app.use(cors({
 
 app.use('/sellers', sellerRouter);
 app.use('/admins', adminRouter);
-// app.use('/products', productRouter);
+app.use('/products', productRouter);
+app.use('/customers', customerRouter);
 
 app.get('/', (req, res) => {
     res.send("Hellow from backend");

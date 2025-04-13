@@ -16,6 +16,8 @@ import SellerList from './Components/SellerList';
 import WHMlogin from './Components/WHMlogin';
 import WHMDashBoard from './Components/WHMDashBoard';
 import PendingSellersList from './Components/PendingSellersList';
+import AllProductsList from './Components/AllProductsList';
+import CustomerDashboard from './Components/CustomerDashboard';
 
 function App() {
   return (
@@ -44,11 +46,12 @@ function App() {
           {/* DashBoards */}
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
-          <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/customerDash' element={<CustomerDashboard />} />
           <Route path='/whmDash' element={<WHMDashBoard />} />
 
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
+          <Route path='/allProduct' element={<AllProductsList />} />
       </Routes>
     </Router>
   );
