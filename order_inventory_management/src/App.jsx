@@ -18,18 +18,24 @@ import WHMDashBoard from './Components/WHMDashBoard';
 import PendingSellersList from './Components/PendingSellersList';
 import AllProductsList from './Components/AllProductsList';
 import CustomerDashboard from './Components/CustomerDashboard';
+import UserHomePage from './Components/UserHomePage';
+import HeaderMenu from './Components/HeaderMenu';
+import UserLogin from './Components/UserLogin';
 
 function App() {
   return (
     <Router> {/* Wrap everything inside BrowserRouter */}
+    <HeaderMenu />
       <Routes>
-          <Route path='/' element={<HomePage />} />
+          {/* <Route path='/' element={<HomePage />} /> */}
+          <Route path='/' element={<UserHomePage />} />
           {/* register paths */}
           <Route path='/sellerReg' element={<SellerRegister />} />
           <Route path='/customerReg' element={<CustomerRegister />} />
           <Route path='/adminReg' element={<AdminRegistration />} />
 
           {/* login paths */}
+          <Route path='/userLogin' element={<UserLogin />} />
           <Route path='/sellerLog' element={<SellerLogin />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
           <Route path='/adminLog' element={<AdminLogin />} />
