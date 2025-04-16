@@ -10,12 +10,65 @@ import {
     ClipboardDocumentCheckIcon,
     ArchiveBoxIcon
 } from '@heroicons/react/24/solid';
+import Autosuggest from 'react-autosuggest';
+import axios from "axios";
 // import { ClipboardCheckIcon, CollectionIcon } from '@heroicons/react/solid';
 
-export default function HeaderMenu({isUserLoggedIn, onLoginStatusChange, isVendorLoggedIn, onVendorLoginStatusChange}) {
+export default function HeaderMenu({isUserLoggedIn, onLoginStatusChange, isVendorLoggedIn, onProductSelect, onVendorLoginStatusChange}) {
+
+    // const [searchedProduct, setSearchedProduct] = useState('');
+    const navigate = useNavigate();
 
     const [searchedProduct, setSearchedProduct] = useState('');
-    const navigate = useNavigate();
+    const [suggestions, setSuggestions] = useState([]);
+
+    const fetchSuggestions = async (value) => {
+        axios.get(`http://localhost:8000/products/search?keyword=${value}`,
+            {
+                withCredentials: true // ✅ move it here!
+            })
+            .then(response => setSuggestions(response.data))
+            .catch(err => console.error("Error fetching products:", err));
+    };
+
+    const onSuggestionsFetchRequested = ({ value }) => {
+        if (value.trim().length > 0) {
+            fetchSuggestions(value);
+        }
+    };
+
+    const onSuggestionsClearRequested = () => {
+        setSuggestions([]);
+    };
+
+    const getSuggestionValue = (suggestion) => suggestion.Name;
+
+    const renderSuggestion = (suggestion) => (
+        <div className="p-2 hover:bg-gray-100 cursor-pointer">
+            {suggestion.Name} - <span className="text-sm text-gray-500">{suggestion.Brand}</span>
+        </div>
+    );
+
+    const onSuggestionSelected = async (event, { suggestion }) => {
+        setSearchedProduct(suggestion.Name);
+        if (onProductSelect) {
+            onProductSelect(suggestion);
+        }
+    };
+
+    const inputProps = {
+        placeholder: "Search for Products, Brands, or More",
+        value: searchedProduct,
+        onChange: (e, { newValue }) => setSearchedProduct(newValue),
+        onKeyDown: (e) => {
+          if (e.key === 'Enter') {
+            // fetch searched data
+          }
+        },
+        className:
+          "w-full rounded-l-lg p-2 font-medium bg-white border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+      };
+         
 
   return (
     <>
@@ -30,31 +83,29 @@ export default function HeaderMenu({isUserLoggedIn, onLoginStatusChange, isVendo
             </div>
 
             {/* Enlarged Search Section */}
-            <div className="flex items-center w-2/5 relative">
-                {/* {shouldShowSearch && ( */}
-                    <div className="flex w-full">
-                        <input
-                            type="text"
-                            value={searchedProduct}
-                            onChange={(e) => setSearchedProduct(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    // fetchSearchedData();
-                                }
-                            }}
-                            placeholder="Search for Products, Brands, or More"
-                            className="w-full rounded-l-lg p-2 font-medium bg-white border-1 border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
-                        />
-                
-                        <button
-                            // onClick={fetchSearchedData}
-                            className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
-                        >
-                            <SearchIcon className="h-5 w-5" />
-                        </button>
-                    </div>
-                {/* )} */}
-            </div>
+            <div className="flex items-center w-2/5 relative z-10">
+    <div className="flex w-full">
+        <div className="relative w-full">
+            <Autosuggest
+                suggestions={suggestions}
+                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={onSuggestionsClearRequested}
+                getSuggestionValue={getSuggestionValue}
+                renderSuggestion={renderSuggestion}
+                inputProps={inputProps}
+                onSuggestionSelected={onSuggestionSelected}
+            />
+        </div>
+
+        <button
+            // onClick={fetchSearchedData}
+            className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
+        >
+            <SearchIcon className="h-5 w-5" />
+        </button>
+    </div>
+</div>
+
 
             {/* User and Logout Section */}
             <div className="flex items-center space-x-4">

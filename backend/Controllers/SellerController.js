@@ -319,6 +319,34 @@ const ModifySellerStatus = async (req, res) => {
     }
 };
 
+const AddExisProduct = async(req, res) => {
+    const { _id } = req.user;
+    const { ProductID, SellerID, Price, Discount, Quantity } = req.body;
+    try {
+        // Get role of the logged-in user
+        const [sellerRows] = await pool.query(
+            'SELECT Status FROM sellers WHERE SellerID = ?',
+            [_id]
+        );
+
+        if (sellerRows.length === 0) {
+            return res.status(403).json({ message: "Unauthorized" });
+        } else if(sellerRows[0].Status !== "Active") {
+            return res.status(403).json({ message: `Seller status is ${sellerRows[0].Status}`});
+        }
+
+        const query = `
+            INSERT INTO sellerinventory (ProductID, SellerID, Price, Discount, Quantity, CurrentStock)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        await pool.execute(query, [ProductID, _id, Price, Discount, Quantity, Quantity]);
+        res.status(200).json({ message: "Product added successfully" });
+    } catch (err) {
+        console.error("Error adding product:", err);
+        res.status(500).json({ error: "Failed to add product" });
+    }
+}
+
 module.exports = 
 {   SellerRegister, 
     SellerLogin,
@@ -327,4 +355,5 @@ module.exports =
     SellerList, 
     PendingSellers,
     ModifySellerStatus,
+    AddExisProduct,
 };

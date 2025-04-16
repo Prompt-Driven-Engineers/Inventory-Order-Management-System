@@ -87,9 +87,17 @@ export default function SellerDashboard() {
                 {/* Add Product Button */}
                 <div className="mt-6">
                     <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                        onClick={() => navigate('/addProduct')}
+                        onClick={() => navigate('/searchProduct')}
                     >
                         <PlusCircle size={20} /> Add Product
+                    </button>
+                </div>
+                {/* Add Product Button */}
+                <div className="mt-6">
+                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        onClick={() => navigate('/addProduct')}
+                    >
+                        <PlusCircle size={20} /> Add New Product
                     </button>
                 </div>
             </div>

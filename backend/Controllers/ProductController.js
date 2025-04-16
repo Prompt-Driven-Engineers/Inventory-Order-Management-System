@@ -40,6 +40,32 @@ const allProductsAdmin = async(req, res) => {
     }
 };
 
+const SearchProduct = async (req, res) => {
+    const { keyword } = req.query;
+
+    try {
+        const query = `
+            SELECT ProductID, Name, Brand, Category, Subcategory, images 
+            FROM inventory
+            WHERE Name LIKE ? 
+               OR Category LIKE ? 
+               OR Subcategory LIKE ? 
+               OR Brand LIKE ?
+            LIMIT 10
+        `;
+        const [results] = await pool.execute(query, [
+            `%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`
+        ]);
+
+        res.status(200).json(results);
+    } catch (err) {
+        console.error("Error searching products:", err);
+        res.status(500).json({ error: "Failed to search products" });
+    }
+};
+
+
 module.exports = {
     allProductsAdmin,
+    SearchProduct,
 };

@@ -21,10 +21,16 @@ import CustomerDashboard from './Components/CustomerDashboard';
 import UserHomePage from './Components/UserHomePage';
 import HeaderMenu from './Components/HeaderMenu';
 import UserLogin from './Components/UserLogin';
+import ProductSearch from './Components/ProductSearch';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
     <Router> {/* Wrap everything inside BrowserRouter */}
+    <ToastContainer 
+        limit={3}
+        autoClose={2000}
+      />
     <HeaderMenu />
       <Routes>
           {/* <Route path='/' element={<HomePage />} /> */}
@@ -58,6 +64,8 @@ function App() {
           {/* other paths */}
           <Route path='/addProduct' element={<AddProduct />} />
           <Route path='/allProduct' element={<AllProductsList />} />
+
+          <Route path='/searchProduct' element={<ProductSearch />} />
       </Routes>
     </Router>
   );

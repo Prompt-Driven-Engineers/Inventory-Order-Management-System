@@ -6,6 +6,8 @@ const { SellerRegister,
         SellerList, 
         PendingSellers,
         ModifySellerStatus,
+        AddExisProduct,
+        
       } = require('../Controllers/SellerController');
 const { verifyToken } = require('../Authntication/UserAuthn');
 const upload = require('../db/Upload');
@@ -19,5 +21,6 @@ router.get('/sellerList', verifyToken, SellerList);
 router.get('/pendingSellers', verifyToken, SellerList);
 router.put('/modSellerStatus', verifyToken, ModifySellerStatus);
 router.post("/addProduct", verifyToken, upload.array("images", 5), AddProduct);
+router.post("/addExisProduct", verifyToken,  AddExisProduct);
 
 module.exports = router;
