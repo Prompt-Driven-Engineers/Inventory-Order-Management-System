@@ -8,6 +8,7 @@ const sellerRouter = require('./Routes/SellerRoutes');
 const adminRouter = require('./Routes/AdminRoutes');
 const productRouter = require('./Routes/ProductRoutes');
 const customerRouter = require('./Routes/CustomerRoutes');
+const AuthnRouter = require('./Routes/AuthRoutes');
 
 app.use(express.json()); // to parse JSON request body
 app.use(cookieParser());
@@ -22,6 +23,7 @@ app.use('/sellers', sellerRouter);
 app.use('/admins', adminRouter);
 app.use('/products', productRouter);
 app.use('/customers', customerRouter);
+app.use('/auth', AuthnRouter);
 
 app.get('/', (req, res) => {
     res.send("Hellow from backend");

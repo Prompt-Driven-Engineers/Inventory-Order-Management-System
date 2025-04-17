@@ -62,32 +62,32 @@ export default function ProductList() {
   }, [currentPrdctType]); // Rerun this effect when currentProductType changes
 
   const fetchByType = async(type) => {
-    setFilteredProducts([]);
-    const response = await fetch(`http://localhost:3000/products/getByType?type=${type}`, {
-      method: 'GET',
-      headers:  {
-        'Content-Type': 'application/json'
-      }
-    });
-    const result = await response.json();
-    setFilteredProducts(result.length ? result : []);
+    // setFilteredProducts([]);
+    // const response = await fetch(`http://localhost:3000/products/getByType?type=${type}`, {
+    //   method: 'GET',
+    //   headers:  {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
+    // const result = await response.json();
+    // setFilteredProducts(result.length ? result : []);
   };
 
   const fetchByCategory = async(category) => {
-    setFilteredProducts([]);
-    const response = await fetch(`http://localhost:3000/products/getByCat?category=${category}`, {
-      method: 'GET',
-      headers:  {
-        'Content-Type': 'application/json'
-      }
-    });
-    const result = await response.json();
-    setFilteredProducts(result.length ? result : []);
+    // setFilteredProducts([]);
+    // const response = await fetch(`http://localhost:3000/products/getByCat?category=${category}`, {
+    //   method: 'GET',
+    //   headers:  {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
+    // const result = await response.json();
+    // setFilteredProducts(result.length ? result : []);
   };
 
   const fetchByName = async() => {
     setFilteredProducts([]);
-    const response = await fetch(`http://localhost:3000/products/getByName?name=${searchedProduct}`, {
+    const response = await fetch(`http://localhost:8000/products/getByName?name=${searchedProduct}`, {
         method: 'GET',
         headers:  {
           'Content-Type': 'application/json'
@@ -108,26 +108,26 @@ export default function ProductList() {
             ...form.attributes,
             [e.target.name] : e.target.value
         }
-    })
+    });
   }
 
   const handleApplyFilter = async(e) => {
     e.preventDefault();
-    const filterForm = form;
-    await fetchByFilter();
-    navigate(`/products/filtered/${encodeURIComponent(JSON.stringify(filterForm))}`);    
-  }
+  //   const filterForm = form;
+  //   await fetchByFilter();
+  //   navigate(`/products/filtered/${encodeURIComponent(JSON.stringify(filterForm))}`);    
+  // }
 
-  const fetchByFilter = async() => {   
-    console.log(form);
-    const response = await fetch(`http://localhost:3000/products/getByFilter?filter=${encodeURIComponent(JSON.stringify(form))}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    const result = await response.json();
-    setFilteredProducts(result.length ? result : []);
+  // const fetchByFilter = async() => {   
+  //   console.log(form);
+  //   const response = await fetch(`http://localhost:3000/products/getByFilter?filter=${encodeURIComponent(JSON.stringify(form))}`, {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     }
+  //   });
+  //   const result = await response.json();
+  //   setFilteredProducts(result.length ? result : []);
     
   }
     
@@ -200,9 +200,9 @@ export default function ProductList() {
 
                   {/* Product Details */}
                   <div className="flex-grow">
-                    <h3 className="text-xl font-semibold text-gray-800">{product.name}</h3>
-                    <p className="text-gray-600 mt-1 line-clamp-2">{product.description}</p>
-                    <p className="text-gray-500 mt-1">Brand: {product.brand}</p>
+                    <h3 className="text-xl font-semibold text-gray-800">{product.Name}</h3>
+                    {/* <p className="text-gray-600 mt-1 line-clamp-2">{product.Description}</p> */}
+                    <p className="text-gray-500 mt-1">Brand: {product.Brand}</p>
                     <p className="text-green-600 font-bold mt-2">
                       ₹{product.price} &nbsp;
                       <span className="line-through text-red-500">
@@ -220,10 +220,7 @@ export default function ProductList() {
             <p className="text-center text-lg text-gray-600">No products found for your search.</p>
           )}
         </div>
-
       </div>
     </div>
-
-  
   );
 }

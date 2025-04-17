@@ -10,69 +10,36 @@ import {
     ClipboardDocumentCheckIcon,
     ArchiveBoxIcon
 } from '@heroicons/react/24/solid';
-import Autosuggest from 'react-autosuggest';
+import SearchBar from './SearchBar';
 import axios from "axios";
-// import { ClipboardCheckIcon, CollectionIcon } from '@heroicons/react/solid';
 
-export default function HeaderMenu({isUserLoggedIn, onLoginStatusChange, isVendorLoggedIn, onProductSelect, onVendorLoginStatusChange}) {
-
-    // const [searchedProduct, setSearchedProduct] = useState('');
-    const navigate = useNavigate();
+export default function HeaderMenu({isUserLoggedIn, isLoggedIn, user, setUser, setIsLoggedIn, isVendorLoggedIn}) {
 
     const [searchedProduct, setSearchedProduct] = useState('');
-    const [suggestions, setSuggestions] = useState([]);
+    const navigate = useNavigate();
 
-    const fetchSuggestions = async (value) => {
-        axios.get(`http://localhost:8000/products/search?keyword=${value}`,
-            {
-                withCredentials: true // ✅ move it here!
-            })
-            .then(response => setSuggestions(response.data))
-            .catch(err => console.error("Error fetching products:", err));
-    };
+    const handleLogout = async() => {
+        try {
+            await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
+            setIsLoggedIn(false); // clear your app state
+            setUser(null);
+            navigate('/');   // optional redirect
+            } catch (err) {
+            console.error('Logout failed:', err);
+            }
+    }
 
-    const onSuggestionsFetchRequested = ({ value }) => {
-        if (value.trim().length > 0) {
-            fetchSuggestions(value);
+    const fetchSearchedData = async() => {
+        if(!searchedProduct) {
+            return;
         }
-    };
-
-    const onSuggestionsClearRequested = () => {
-        setSuggestions([]);
-    };
-
-    const getSuggestionValue = (suggestion) => suggestion.Name;
-
-    const renderSuggestion = (suggestion) => (
-        <div className="p-2 hover:bg-gray-100 cursor-pointer">
-            {suggestion.Name} - <span className="text-sm text-gray-500">{suggestion.Brand}</span>
-        </div>
-    );
-
-    const onSuggestionSelected = async (event, { suggestion }) => {
-        setSearchedProduct(suggestion.Name);
-        if (onProductSelect) {
-            onProductSelect(suggestion);
-        }
-    };
-
-    const inputProps = {
-        placeholder: "Search for Products, Brands, or More",
-        value: searchedProduct,
-        onChange: (e, { newValue }) => setSearchedProduct(newValue),
-        onKeyDown: (e) => {
-          if (e.key === 'Enter') {
-            // fetch searched data
-          }
-        },
-        className:
-          "w-full rounded-l-lg p-2 font-medium bg-white border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
-      };
-         
+    
+        navigate(`/search/${searchedProduct}`);
+    }
 
   return (
     <>
-        <div className="box-border flex justify-around items-center border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
+        <div className="box-border flex justify-around border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
 
             {/* Logo Section */}
             <div className="flex items-center">
@@ -83,50 +50,59 @@ export default function HeaderMenu({isUserLoggedIn, onLoginStatusChange, isVendo
             </div>
 
             {/* Enlarged Search Section */}
-            <div className="flex items-center w-2/5 relative z-10">
-    <div className="flex w-full">
-        <div className="relative w-full">
-            <Autosuggest
-                suggestions={suggestions}
-                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                onSuggestionsClearRequested={onSuggestionsClearRequested}
-                getSuggestionValue={getSuggestionValue}
-                renderSuggestion={renderSuggestion}
-                inputProps={inputProps}
-                onSuggestionSelected={onSuggestionSelected}
-            />
-        </div>
+            {/* <div className="relative z-10"> */}
+                <div className="flex w-full mx-4 md:mx-8">
+                    {/* <div className="relative w-full">
+                        <Autosuggest
+                            suggestions={suggestions}
+                            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                            onSuggestionsClearRequested={onSuggestionsClearRequested}
+                            getSuggestionValue={getSuggestionValue}
+                            renderSuggestion={renderSuggestion}
+                            inputProps={inputProps}
+                            onSuggestionSelected={onSuggestionSelected}
+                        />
+                    </div> */}
+                    <SearchBar />
 
-        <button
-            // onClick={fetchSearchedData}
-            className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
-        >
-            <SearchIcon className="h-5 w-5" />
-        </button>
-    </div>
-</div>
+                    <button
+                        // onClick={fetchSearchedData}
+                        className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
+                    >
+                        <SearchIcon className="h-5 w-5" />
+                    </button>
+                </div>
+            {/* </div> */}
 
 
             {/* User and Logout Section */}
             <div className="flex items-center space-x-4">
-                <div
-                    onClick={() => { navigate('/userLogin'); }}
-                    className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-600 transition-all duration-300"
-                >
-                    <LoginIcon className="h-5 w-5 mr-2" />
-                    Login
+            {isLoggedIn ? (
+                    <div className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-2xl cursor-pointer hover:bg-blue-600 transition-all duration-300">
+                    <span className="text-sm font-medium">
+                        {(user?.email?.slice(0, 1) || '').toUpperCase()}
+                    </span>
                 </div>
-                    
+                
+                ) : (
+                    <div
+                        onClick={() => { navigate('/userLogin'); }}
+                        className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-600 transition-all duration-300"
+                    >
+                        <LoginIcon className="h-5 w-5 mr-2" />
+                        Login
+                    </div>
+                )}
 
-                {(isUserLoggedIn || isVendorLoggedIn) && (
+                {isLoggedIn && 
                     <div 
-                        // onClick={} 
+                        onClick={handleLogout} 
                         className="flex items-center bg-gray-300 text-gray-700 px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-gray-400 transition-all duration-300"
                     >
                         <LogoutIcon className="h-5 w-5 mr-2" />
                         Logout
                     </div>
-                )}
+                }
 
                 {!isVendorLoggedIn && (
                     <div className="flex items-center  px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-300 transition-all duration-300">

@@ -64,8 +64,55 @@ const SearchProduct = async (req, res) => {
     }
 };
 
+const getProductByTerm = async (req, res) => {
+    const name = req.query.name;
+
+    if (!name) {
+        return res.status(400).json({ message: 'Search term is missing' });
+    }
+
+    const connection = await pool.getConnection(); // Or use pool.query if you're using pooling
+
+    try {
+        // Split terms for broader matching
+        const searchTerms = name.split(' ').map(term => `%${term}%`);
+
+        // Build dynamic WHERE clause for each term and each field
+        const whereClauses = searchTerms.map(() => `
+            (Name LIKE ? OR 
+             Description LIKE ? OR 
+             Brand LIKE ? OR 
+             Category LIKE ? OR 
+             Subcategory LIKE ?)
+        `).join(" OR ");
+
+        const values = searchTerms.flatMap(term => [term, term, term, term, term]);
+
+        const query = `
+            SELECT * FROM inventory
+            WHERE ${whereClauses}
+            LIMIT 50;
+        `;
+
+        const [rows] = await connection.execute(query, values);
+
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ message: 'No products found' });
+        }
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    } finally {
+        connection.release(); // Always release connection if using pool
+    }
+};
+
+
 
 module.exports = {
     allProductsAdmin,
     SearchProduct,
+    getProductByTerm,
 };

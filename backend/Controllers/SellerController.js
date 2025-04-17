@@ -321,7 +321,7 @@ const ModifySellerStatus = async (req, res) => {
 
 const AddExisProduct = async(req, res) => {
     const { _id } = req.user;
-    const { ProductID, SellerID, Price, Discount, Quantity } = req.body;
+    const { ProductID, Price, Discount, Quantity } = req.body;
     try {
         // Get role of the logged-in user
         const [sellerRows] = await pool.query(

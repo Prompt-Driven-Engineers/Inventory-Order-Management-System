@@ -35,8 +35,34 @@ const verifyToken = (req, res, next) => {
     next();
 };
 
+// GET /api/auth/check-auth
+const checkAuth = (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ isLoggedIn: false });
+  
+    try {
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      res.json({ isLoggedIn: true, user: decoded });
+    } catch (err) {
+      return res.status(401).json({ isLoggedIn: false });
+    }
+}; 
+
+// /routes/auth.js (or wherever you define auth routes)
+const handleLogout = (req, res) => {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true,      // use true if you're on https
+      sameSite: 'Strict' // or 'Lax' based on your setup
+    });
+    return res.json({ message: 'Logged out successfully' });
+};
+  
+
 module.exports = {
     setUser,
     getUser,
     verifyToken,
+    checkAuth,
+    handleLogout,
 }

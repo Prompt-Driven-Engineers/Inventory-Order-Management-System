@@ -23,15 +23,40 @@ import HeaderMenu from './Components/HeaderMenu';
 import UserLogin from './Components/UserLogin';
 import ProductSearch from './Components/ProductSearch';
 import { ToastContainer } from 'react-toastify';
+import ProductList from './Components/ProductList';
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      console.log("Working");
+      try {
+        const res = await axios.get('http://localhost:8000/auth/check-auth', { withCredentials: true });
+        if (res.data.isLoggedIn) {
+          console.log("Logged in");
+          setIsLoggedIn(true);
+          setUser(res.data.user);
+        }
+      } catch (err) {
+        setIsLoggedIn(false);
+        setUser(null);
+        console.log(err);
+      }
+    };
+    checkLogin();
+  }, [isLoggedIn]);
+
   return (
     <Router> {/* Wrap everything inside BrowserRouter */}
     <ToastContainer 
         limit={3}
         autoClose={2000}
       />
-    <HeaderMenu />
+      <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn}/>
       <Routes>
           {/* <Route path='/' element={<HomePage />} /> */}
           <Route path='/' element={<UserHomePage />} />
@@ -41,15 +66,15 @@ function App() {
           <Route path='/adminReg' element={<AdminRegistration />} />
 
           {/* login paths */}
-          <Route path='/userLogin' element={<UserLogin />} />
-          <Route path='/sellerLog' element={<SellerLogin />} />
+          <Route path='/userLogin' element={<UserLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
+          <Route path='/sellerLog' element={<SellerLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/customerLog' element={<CustomerLogin />} />
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
           <Route path='/pendingSellers' element={<PendingSellersList />} />
 
-          <Route path='/adminLog' element={<AdminLogin />} />
+          <Route path='/adminLog' element={<AdminLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
@@ -66,6 +91,7 @@ function App() {
           <Route path='/allProduct' element={<AllProductsList />} />
 
           <Route path='/searchProduct' element={<ProductSearch />} />
+          <Route path="/find/:searchedProduct" element={<ProductList />} />
       </Routes>
     </Router>
   );

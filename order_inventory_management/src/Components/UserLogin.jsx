@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 
-export default function UserLogin({onLoginStatusChange, onVendorLoginStatusChange}) {
+export default function UserLogin({ setUser, setIsLoggedIn }) {
     // State to track which tab is active (default is 'customer')
     const [activeTab, setActiveTab] = useState('customer');
     const [errors, setErrors] = useState({});
@@ -65,6 +65,7 @@ export default function UserLogin({onLoginStatusChange, onVendorLoginStatusChang
                     console.log(result.error || 'Something went wrong');
                     alert(result.error || 'Something went wrong')
                 } else {
+                    setIsLoggedIn(true);
                     console.log("Login successful:", result);
                     navigate(`/customerDash`);
                     alert("Login successful!"); // Show success message to the user
@@ -91,6 +92,7 @@ export default function UserLogin({onLoginStatusChange, onVendorLoginStatusChang
                     console.log(result.error || 'Something went wrong');
                     alert(result.error || 'Something went wrong')
                 } else {
+                    setIsLoggedIn(true);
                     console.log("Login successful:", result);
                     navigate(`/sellerDash`);
                     alert("Login successful!"); // Show success message to the user

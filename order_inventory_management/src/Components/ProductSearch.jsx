@@ -16,10 +16,7 @@ const ProductSearch = () => {
 
     // Function to fetch product suggestions
     const onSuggestionsFetchRequested = ({ value }) => {
-        axios.get(`http://localhost:8000/products/search?keyword=${value}`,
-            {
-                withCredentials: true // ✅ move it here!
-            })
+        axios.get(`http://localhost:8000/products/search?keyword=${value}`)
             .then(response => setSuggestions(response.data))
             .catch(err => console.error("Error fetching products:", err));
     };
