@@ -149,7 +149,7 @@ const AdminLogin = async (req, res) => {
 
         const Email = emailRows[0].Email;
         // **Step 4: Generate JWT token using setUser**
-        const token = setUser({ UserID, Email });
+        const token = setUser({ UserID, Email, Role: 'Admin' });
 
         // **Step 5: Set cookie and send response**
         res.cookie("token", token);

@@ -12,6 +12,8 @@ import {
 } from '@heroicons/react/24/solid';
 import SearchBar from './SearchBar';
 import axios from "axios";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function HeaderMenu({isUserLoggedIn, isLoggedIn, user, setUser, setIsLoggedIn, isVendorLoggedIn}) {
 
@@ -48,32 +50,16 @@ export default function HeaderMenu({isUserLoggedIn, isLoggedIn, user, setUser, s
                     <span className="text-green-500">Cart</span>
                 </div>
             </div>
+            <div className="flex w-full mx-4 md:mx-8">
+                <SearchBar />
 
-            {/* Enlarged Search Section */}
-            {/* <div className="relative z-10"> */}
-                <div className="flex w-full mx-4 md:mx-8">
-                    {/* <div className="relative w-full">
-                        <Autosuggest
-                            suggestions={suggestions}
-                            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                            onSuggestionsClearRequested={onSuggestionsClearRequested}
-                            getSuggestionValue={getSuggestionValue}
-                            renderSuggestion={renderSuggestion}
-                            inputProps={inputProps}
-                            onSuggestionSelected={onSuggestionSelected}
-                        />
-                    </div> */}
-                    <SearchBar />
-
-                    <button
-                        // onClick={fetchSearchedData}
-                        className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
-                    >
-                        <SearchIcon className="h-5 w-5" />
-                    </button>
-                </div>
-            {/* </div> */}
-
+                <button
+                    // onClick={fetchSearchedData}
+                    className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
+                >
+                    <SearchIcon className="h-5 w-5" />
+                </button>
+            </div>
 
             {/* User and Logout Section */}
             <div className="flex items-center space-x-4">
@@ -116,17 +102,31 @@ export default function HeaderMenu({isUserLoggedIn, isLoggedIn, user, setUser, s
 
             {/* Cart and Wishlist Section */}
             <div className="flex items-center space-x-4">
-                {!isVendorLoggedIn && (
+                {(user?.role !== 'Admin' && user?.role !== 'Seller') && (
                     <>
                         <button 
-                            onClick={() => { isUserLoggedIn ? navigate('/cart') : navigate('/customerLogin') }} 
+                            onClick={() => { 
+                                if(isLoggedIn) {
+                                    navigate('/cart');
+                                } else {
+                                    navigate('/userLogin');
+                                    toast.info("Please login to access your cart");
+                                }
+                            }} 
                             className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
                         >
                             <ShoppingCartIcon className="h-5 w-5 mr-1" />
                             Cart
                         </button>
                         <button 
-                            onClick={() => { isUserLoggedIn ? navigate('/wishlist') : navigate('/customerLogin') }} 
+                            onClick={() => { 
+                                if(isLoggedIn) {
+                                    navigate('/wishlist');
+                                } else {
+                                    navigate('/userLogin');
+                                    toast.info("Please login to access your Wishlist");
+                                }
+                            }}
                             className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
                         >
                             <HeartIcon className="h-5 w-5 mr-1" />

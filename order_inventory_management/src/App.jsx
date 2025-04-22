@@ -26,6 +26,8 @@ import { ToastContainer } from 'react-toastify';
 import ProductList from './Components/ProductList';
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import Cart from './Components/Cart';
+import Wishlist from './Components/Wishlist';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,7 +56,7 @@ function App() {
     <Router> {/* Wrap everything inside BrowserRouter */}
     <ToastContainer 
         limit={3}
-        autoClose={2000}
+        autoClose={3000}
       />
       <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn}/>
       <Routes>
@@ -92,6 +94,8 @@ function App() {
 
           <Route path='/searchProduct' element={<ProductSearch />} />
           <Route path="/find/:searchedProduct" element={<ProductList />} />
+          <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />} />
+          <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
       </Routes>
     </Router>
   );
