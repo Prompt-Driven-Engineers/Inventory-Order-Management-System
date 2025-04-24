@@ -28,6 +28,7 @@ import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import Cart from './Components/Cart';
 import Wishlist from './Components/Wishlist';
+import ProductPage from './Components/ProductPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -94,6 +95,7 @@ function App() {
 
           <Route path='/searchProduct' element={<ProductSearch />} />
           <Route path="/find/:searchedProduct" element={<ProductList />} />
+          <Route path="/visit/:productId" element={<ProductPage isLoggedIn={isLoggedIn} user={user} />} />
           <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />} />
           <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
       </Routes>

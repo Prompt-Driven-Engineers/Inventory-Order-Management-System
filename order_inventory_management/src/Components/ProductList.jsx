@@ -180,14 +180,18 @@ export default function ProductList() {
               {filteredProducts.map((product, index) => (
                 <li
                   key={index}
-                  onClick={() => navigate(`/visit/${product._id}`)}
+                  onClick={() => {
+                    const id = product.SellerInventoryID || product.ProductID;
+                    const type = product.SellerInventoryID ? "seller" : "product";
+                    navigate(`/visit/${id}?type=${type}`);
+                  }}                  
                   className="flex items-center bg-white my-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all ease-in-out cursor-pointer"
                 >
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={`http://localhost:3000/${product.images[0]}`} // Show the first image
+                      // src={`http://localhost:3000/${product.images[0]}`} // Show the first image
                       alt={product.name}
                       className="w-full h-full object-contain rounded-lg"
                     />
@@ -203,15 +207,17 @@ export default function ProductList() {
                     <h3 className="text-xl font-semibold text-gray-800">{product.Name}</h3>
                     {/* <p className="text-gray-600 mt-1 line-clamp-2">{product.Description}</p> */}
                     <p className="text-gray-500 mt-1">Brand: {product.Brand}</p>
-                    <p className="text-green-600 font-bold mt-2">
-                      ₹{product.price} &nbsp;
+                    {product.Price && <p className="text-green-600 font-bold mt-2">
+                      ₹{product.Price} &nbsp;
                       <span className="line-through text-red-500">
                         ₹
                         {Math.round(
-                          product.price / (1 - product.discountPercentage / 100)
+                          product.Price / (1 - product.Discount / 100)
                         )}
                       </span>
-                    </p>
+                    </p>}
+                    {product.CurrentStock && <p className="text-red-600 mt-2">Only {product.CurrentStock} left</p>}
+                    {product.comingSoon && <p className="text-green-600 font-bold mt-2">Comming soon</p>}
                   </div>
                 </li>
               ))}
