@@ -41,7 +41,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-grow p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-        <div className="bg-gray-200 p-6 rounded-lg shadow-md text-center h-40 flex items-center justify-center">
+        <div className="bg-gray-200 p-6 rounded-lg shadow-md text-center h-40 flex items-center justify-center active:scale-95">
           <p className="text-lg text-gray-600">Feature 1</p>
         </div>
         <div className="bg-gray-200 p-6 rounded-lg shadow-md text-center h-40 flex items-center justify-center">

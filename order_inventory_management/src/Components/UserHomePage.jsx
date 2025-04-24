@@ -20,12 +20,12 @@ export default function UserHomePage() {
         <div className="h-full bg-gray-50 py-6">
 
     {/* Hero/Banner Section */}
-    <div className="bg-gradient-to-r from-blue-500 to-blue-400 p-10 text-center mb-12">
-        <h1 className="text-4xl font-bold text-white mb-4">Welcome to SecureCart!</h1>
+    <div className="bg-gradient-to-r from-blue-500 to-green-300 p-10 text-center mb-12">
+        <h1 className="text-4xl font-bold text-white mb-4 ">Welcome to SecureCart!</h1>
         <p className="text-lg text-white mb-6">Find the best deals and offers on our platform</p>
         <button 
             onClick={() => {handleClickCat('electronics')}}
-            className="bg-green-500 text-white px-5 py-2 rounded-md font-semibold hover:bg-green-600 transition-all duration-300 ease-in-out">
+            className="bg-green-500 text-white px-5 py-2 rounded-md font-semibold hover:bg-green-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out shadow-lg">
             Browse Now
         </button>
     </div>
@@ -46,7 +46,7 @@ export default function UserHomePage() {
                     <div
                         key={index}
                         onClick={() => handleClickCat(category)}
-                        className="flex flex-col items-center justify-center h-40 w-40 bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105"
+                        className="flex flex-col items-center justify-center h-40 w-40 bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 "
                     >
                         <span className="text-xl font-medium">{category}</span>
                     </div>
@@ -62,7 +62,7 @@ export default function UserHomePage() {
                     <div
                         key={index}
                         onClick={() => {navigate(`/products/${productType}`)}}
-                        className="flex flex-col items-center justify-center h-40 w-40 bg-green-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105"
+                        className="flex flex-col items-center justify-center h-40 w-40 bg-green-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95"
                     >
                         <span className="text-xl font-medium">{productType}</span>
                     </div>
