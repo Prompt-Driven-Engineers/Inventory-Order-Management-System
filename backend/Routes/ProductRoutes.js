@@ -1,11 +1,12 @@
 const express = require('express');
 const { verifyToken } = require('../Authntication/UserAuthn');
-const { allProductsAdmin, SearchProduct, getProductByTerm } = require('../Controllers/ProductController');
+const { allProductsAdmin, SearchProduct, getProductByTerm, getProductById } = require('../Controllers/ProductController');
 
 const router = express.Router();
 
 router.get('/allProducts', verifyToken, allProductsAdmin);
 router.get('/search', SearchProduct);
 router.get('/getByName', getProductByTerm);
+router.get('/getById', getProductById);
 
 module.exports = router;

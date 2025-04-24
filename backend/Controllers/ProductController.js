@@ -66,7 +66,7 @@ const SearchProduct = async (req, res) => {
 
 const getProductByTerm = async (req, res) => {
     const name = req.query.name;
-
+    console.log(name);
     if (!name) {
         return res.status(400).json({ message: 'Search term is missing' });
     }
@@ -74,23 +74,29 @@ const getProductByTerm = async (req, res) => {
     const connection = await pool.getConnection(); // Or use pool.query if you're using pooling
 
     try {
-        // Split terms for broader matching
-        const searchTerms = name.split(' ').map(term => `%${term}%`);
+        const searchTerms = name.trim().split(/\s+/); // split by spaces
+        const likePatterns = searchTerms.map(term => `%${term}%`);
 
-        // Build dynamic WHERE clause for each term and each field
-        const whereClauses = searchTerms.map(() => `
-            (Name LIKE ? OR 
-             Description LIKE ? OR 
-             Brand LIKE ? OR 
-             Category LIKE ? OR 
-             Subcategory LIKE ?)
-        `).join(" OR ");
+        let whereClauses = [];
+        let values = [];
 
-        const values = searchTerms.flatMap(term => [term, term, term, term, term]);
+        // Build OR conditions for each term across important fields
+        searchTerms.forEach(term => {
+            const likeTerm = `%${term}%`;
+            whereClauses.push(`
+                (Name LIKE ? OR 
+                Description LIKE ? OR 
+                Brand LIKE ? OR 
+                Category LIKE ? OR 
+                Subcategory LIKE ?)
+            `);
+            values.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+        });
 
         const query = `
-            SELECT * FROM inventory
-            WHERE ${whereClauses}
+            SELECT *, 0 AS relevance
+            FROM inventory
+            WHERE ${whereClauses.join(" AND ")} 
             LIMIT 50;
         `;
 
@@ -100,7 +106,46 @@ const getProductByTerm = async (req, res) => {
             return res.status(404).json({ message: 'No products found' });
         }
 
-        res.json(rows);
+        const productIds = rows.map(product => product.ProductID); // adjust field name if needed
+
+        // Fetch seller inventory for these products
+        const [sellerRows] = await connection.execute(
+            `SELECT * FROM sellerinventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            productIds
+        );
+
+        // Map seller data by product ID for quick lookup
+        const sellerMap = new Map();
+        sellerRows.forEach(item => {
+            sellerMap.set(item.ProductID, item);
+        });
+
+        // Final product list
+        const finalProducts = [];
+
+        // First: products that are available in sellerinventory
+        rows.forEach(product => {
+            if (sellerMap.has(product.ProductID)) {
+                const sellerData = sellerMap.get(product.ProductID);
+                finalProducts.push({
+                    ...product,
+                    ...sellerData,
+                    comingSoon: false
+                });
+            }
+        });
+
+        // Then: products that are not in sellerinventory (mark as coming soon)
+        rows.forEach(product => {
+            if (!sellerMap.has(product.ProductID)) {
+                finalProducts.push({
+                    ...product,
+                    comingSoon: true
+                });
+            }
+        });
+
+        res.json(finalProducts);
     } catch (error) {
         console.error('Search error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -109,10 +154,83 @@ const getProductByTerm = async (req, res) => {
     }
 };
 
+const getProductById = async (req, res) => {
+    const { id, type } = req.query;
+
+    if (!id || !type) {
+        return res.status(400).json({ message: "Missing id or type" });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+        let sellerData = null;
+        let productId = id;
+
+        if (type === "seller") {
+            const [sellerRows] = await connection.execute(
+                `SELECT ProductID, SellerID, Price, Discount, CurrentStock 
+                 FROM sellerInventory 
+                 WHERE SellerInventoryID = ?`,
+                [id]
+            );
+
+            if (!sellerRows.length) {
+                return res.status(404).json({ message: "Seller product not found" });
+            }
+
+            sellerData = sellerRows[0];
+            productId = sellerData.ProductID;
+        }
+
+        const [productRows] = await connection.execute(
+            'SELECT * FROM inventory WHERE ProductID = ?',
+            [productId]
+        );
+
+        if (!productRows.length) {
+            return res.status(404).json({ message: "Product not found in inventory" });
+        }
+
+        const productData = productRows[0];
+
+        const finalResponse = {
+            ...productData,
+            ...(sellerData ? {
+                SellerID: sellerData.SellerID,
+                Price: sellerData.Price,
+                Discount: sellerData.Discount,
+                CurrentStock: sellerData.CurrentStock,
+                SellerInventoryID: id
+            } : {
+                comingSoon: true
+            })
+        };
+
+        res.status(200).json(finalResponse);
+    } catch (error) {
+        console.error('Fetching error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    } finally {
+        connection.release();
+    }
+};
+
+const addToWishlist = async(req, res) => {
+    const { _id, role } = req.user;
+    const {productId, type, } = req.body;
+    try {
+
+    } catch(error) {
+
+    }
+}
 
 
 module.exports = {
     allProductsAdmin,
     SearchProduct,
     getProductByTerm,
+    getProductById,
+    addToWishlist,
 };
