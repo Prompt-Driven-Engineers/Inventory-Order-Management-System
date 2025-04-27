@@ -16,7 +16,6 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     });
 
     const validateForm = () => {
-        console.log('Inside validation');
         let newErrors = {};
     
         if (!/\S+@\S+\.\S+/.test(form.Email)) newErrors.Email = "Enter Valid Email";
@@ -28,7 +27,6 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
         if (!form.Password.trim()) newErrors.Password = "Password is required";
     
         setErrors(newErrors);
-        console.log(errors);
     
         return Object.keys(newErrors).length === 0; // Returns `true` if no errors
     };
@@ -49,7 +47,6 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
         e.preventDefault();
         if (!validateForm()) return; // Stop if validation fails
         if(activeTab === 'customer') {
-            console.log("logging in user");
             try{
                 const response = await fetch('http://localhost:8000/customers/customerLogin', {
                     method: 'POST',
@@ -62,11 +59,9 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     
                 const result = await response.json();
                 if (!response.ok) {
-                    console.log(result.error || 'Something went wrong');
                     alert(result.error || 'Something went wrong')
                 } else {
                     setIsLoggedIn(true);
-                    console.log("Login successful:", result);
                     navigate(`/customerDash`);
                     alert("Login successful!"); // Show success message to the user
                 }
@@ -76,7 +71,6 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 alert(error.message); // Show error message to the user
             }
         } else if(activeTab === 'vendor') {
-            console.log("logging in vendor");
             try{
                 const response = await fetch('http://localhost:8000/sellers/sellerLogin', {
                     method: 'POST',
@@ -89,11 +83,9 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     
                 const result = await response.json();
                 if (!response.ok) {
-                    console.log(result.error || 'Something went wrong');
                     alert(result.error || 'Something went wrong')
                 } else {
                     setIsLoggedIn(true);
-                    console.log("Login successful:", result);
                     navigate(`/sellerDash`);
                     alert("Login successful!"); // Show success message to the user
                 }

@@ -7,7 +7,7 @@ export default function ProductPage({isLoggedIn, user}) {
     const type = searchParams.get('type');
     const [product, setProduct] = useState(null); // Initialize with null to handle loading state
     const navigate = useNavigate();
-    const [wislisted, setWishlisted] = useState(false);
+    const [wishlisted, setWishlisted] = useState(false);
     const [carted, setCarted] = useState(false);
 
     // Fetch product by ID
@@ -19,144 +19,108 @@ export default function ProductPage({isLoggedIn, user}) {
             });
             const result = await response.json();
             setProduct(result);
-            console.log(result);
         } catch (error) {
             console.error('Error fetching product:', error);
         }
     };    
 
     const checkIfwishListed = async() => {
-        // const response = await fetch('http://localhost:8000/users//isWishlist', {
-        //    method: 'POST',
-        //    body: JSON.stringify({
-        //         customerId: user._id,
-        //         productId
-        //    }),
-        //    headers: {
-        //     'Content-Type': 'application/json'
-        //    } 
-        // });
+        const response = await fetch('http://localhost:8000/customers/isWishlist', {
+           method: 'POST',
+           credentials: 'include',
+           body: JSON.stringify({
+                productId,  // Could be producid or sellerinventoryid both
+                type    // defines if the id is sellerinventoryid or productid
+           }),
+           headers: {
+            'Content-Type': 'application/json'
+           } 
+        });
 
-        // // const result = await respose.json();
-        // const result = await response.json();
-        // if(response.ok) {
-        //     setWishlisted(result.isCarted);
-        // } else {
-        //     console.log('Error occured while finding in cart');
-        // }
+        // const result = await respose.json();
+        const result = await response.json();
+        if(response.ok) {
+            setWishlisted(result.isWishlisted);
+        } else {
+            console.log('Error occured while finding in wishlist');
+        }
     }
 
-    const addToWishlist = async () => {
-        if (!product?.ProductID) {
-            console.warn("Product ID is missing");
-            return;
-        }
-    
+    const toggleWishlist = async () => {
         try {
-            const response = await fetch('http://localhost:8000/customers/addToWishlist', {
+            const response = await fetch('http://localhost:8000/customers/handleWishlist', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include', // keep cookies/session
+                credentials: 'include',
                 body: JSON.stringify({
                     productId,
                     type,
-                    isCarted: !carted
+                    isWishlisted: !wishlisted  // Corrected the spelling
                 })
             });
     
             const data = await response.json();
-    
+            checkIfwishListed();
             if (response.ok) {
-                setWishlisted(true);
-                console.log('✅ Product added to wishlist successfully');
+                console.log(`✅ ${data.message}`);
             } else {
-                console.warn('⚠️ Failed to add product to wishlist:', data.message || 'Unknown error');
+                console.warn('⚠️ Failed to update wishlist:', data.message || 'Unknown error');
             }
         } catch (error) {
-            console.error('❌ Error adding to wishlist:', error);
+            console.error('❌ Error updating wishlist:', error);
         }
-    };    
-
-    const removeFromWishlist = async() => {
-        // const response = await fetch('http://localhost:3000/users/removeFromWishlist',
-        //     {
-        //         method: 'POST',
-        //         body: JSON.stringify ({
-        //             customerId: user._id,
-        //             productId: product._id
-        //         }),
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         }
-        //     }
-        // );
-        // // const result = await response.json();
-        // if(response.ok) {
-        //     setWishlisted(false);
-        //     console.log('Product removed from wishlist successfully');
-        // } else if(response.status === 400) {
-        //     console.log('CustomerId and ProductId is required');
-        // } else if(response.status === 404) {
-        //     console.log('Product not found in wishlist');
-        // } else {
-        //     console.log('Error occured while removing product from wishlist');
-        // }
-    }
-
-    const addToCart = async() => {
-        // if(isLoggedIn) {
-        //     try{
-        //         const response = await fetch('http://localhost:3000/users/addToCart',
-        //             {
-        //                 method: 'POST',
-        //                 body: JSON.stringify({
-        //                     customerId: user._id,
-        //                     productId: product._id
-        //                 }),
-        //                 headers: {
-        //                     'Content-Type': 'application/json'
-        //                 }
-        //             }
-        //         )
-        //         if(response.ok) {
-        //             setCarted(true);
-        //             console.log('Product added to cart successfully');
-        //         } else if(response.status === 400) {
-        //             console.log('Product alredy exist in Cart');
-        //         } else {
-        //             console.log('Error occured while adding the product');
-        //         }
-        //     } catch(error) {
-        //         console.log(error);
-        //     }
-        // } else {
-        //     navigate('/customerLogin');
-        // }
-    }
-
+    };
+    
     const checkIfCarted = async() => {
-        // try{
-        //     const response = await fetch('http://localhost:3000/users/isCarted',{
-        //         method: 'POST',
-        //         body: JSON.stringify({
-        //             customerId: user._id,
-        //             productId: productId
-        //         }),
-        //         headers: {
-        //             'Content-Type' : 'application/json'
-        //         }
-        //     });
-        //     const result = await response.json();
-        //     if(response.ok) {
-        //         setCarted(result.isCarted);
-        //     } else {
-        //         console.log('Error occured while finding in cart');
-        //     }
-        // } catch(error) {
-        //     console.log(error);
-        // }
+        if(type === 'product')  return;
+
+        const response = await fetch('http://localhost:8000/customers/isCarted', {
+           method: 'POST',
+           credentials: 'include',
+           body: JSON.stringify({
+                SellerInventoryID: productId,  // Could be producid or sellerinventoryid both
+           }),
+           headers: {
+            'Content-Type': 'application/json'
+           } 
+        });
+
+        const result = await response.json();
+        if(response.ok) {
+            setCarted(result.isCarted);
+        } else {
+            console.log('Error occured while finding in Cart');
+        }
+    }
+
+    const toggleCart = async() => {
+        if(type === 'product')  return;
+
+        try {
+            const response = await fetch('http://localhost:8000/customers/handleCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    SellerInventoryID: productId,
+                    isCarted: !carted  // Corrected the spelling
+                })
+            });
+    
+            const data = await response.json();
+            checkIfCarted();
+            if (response.ok) {
+                console.log(`✅ ${data.message}`);
+            } else {
+                console.warn('⚠️ Failed to update Cart:', data.message || 'Unknown error');
+            }
+        } catch (error) {
+            console.error('❌ Error updating Cart:', error);
+        }
     }
 
     const handleOrder = async() => {
@@ -208,21 +172,35 @@ export default function ProductPage({isLoggedIn, user}) {
         <>
             <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg space-y-6">
         {/* Hero Banner */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center p-4 rounded-lg shadow-lg mb-6">
-            <p className="text-xl font-bold">Exclusive Offer: Get 20% off on this product!</p>
-        </div>
+        {(product?.Discount > 10) && <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-center p-4 rounded-lg shadow-lg mb-6">
+            <p className="text-xl font-bold">Exclusive Offer: Get {product.Discount || 0}% off on this product!</p>
+        </div>}
 
         {/* Images */}
-        <div className="flex flex-wrap justify-start mb-6 space-x-4">
-            {product.images && product.images.length > 0 ? (
-                product.images.map((image, index) => (
-                    <img
+        <div className="flex flex-wrap gap-4 justify-center mb-6">
+            {product.images ? (
+                (() => {
+                try {
+                    const imagesArray = JSON.parse(product.images);  // Parse images
+                    return imagesArray.length > 0 ? (
+                    imagesArray.map((image, index) => (
+                        <img
                         key={index}
-                        // src={`http://localhost:3000/${image}`} // Accessing the correct URL path
+                        src={image}  // Directly using image URL
                         alt={`${product.Name} image ${index + 1}`}
-                        className="w-48 h-48 object-cover rounded-md m-2 shadow-md transform transition-transform duration-200 hover:scale-105"
-                    />
-                ))
+                        className="w-48 h-48 object-contain rounded-md m-2 shadow-md transform transition-transform duration-200 hover:scale-105"
+                        />
+                    ))
+                    ) : (
+                    <div className="text-gray-500 text-center w-full">No images available</div>
+                    );
+                } catch (error) {
+                    console.error("Invalid images format", error);
+                    return (
+                    <div className="text-gray-500 text-center w-full">No images available</div>
+                    );
+                }
+                })()
             ) : (
                 <div className="text-gray-500 text-center w-full">No images available</div>
             )}
@@ -277,16 +255,16 @@ export default function ProductPage({isLoggedIn, user}) {
                 
                 {(user?.role !== 'Admin' && user?.role !== 'Seller') && <div className="space-x-4 mt-6 flex justify-between">
                     {/* Wishlist Button */}
-                    {wislisted ? (
+                    {wishlisted ? (
                         <button
-                            onClick={() => { isLoggedIn ? removeFromWishlist() : navigate('/userLogin')}}
+                            onClick={() => { isLoggedIn ? toggleWishlist() : navigate('/userLogin')}}
                             className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all flex items-center"
                         >
                             <i className="fas fa-heart mr-2"></i> Liked
                         </button>
                     ) : (
                         <button
-                            onClick={() => { isLoggedIn ? addToWishlist() : navigate('/userLogin')}}
+                            onClick={() => { isLoggedIn ? toggleWishlist() : navigate('/userLogin')}}
                             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex items-center"
                         >
                             <i className="fas fa-heart mr-2"></i> Add to WishList
@@ -304,7 +282,7 @@ export default function ProductPage({isLoggedIn, user}) {
                             </button>
                         ) : (
                             <button
-                                onClick={() => { isLoggedIn ? addToCart() : navigate('/userLogin') }}
+                                onClick={() => { isLoggedIn ? toggleCart() : navigate('/userLogin') }}
                                 className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
                             >
                                 <i className="fas fa-shopping-cart mr-2"></i> Add to Cart

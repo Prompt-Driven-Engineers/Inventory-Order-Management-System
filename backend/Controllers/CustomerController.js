@@ -146,9 +146,298 @@ const CustomerDetails = async (req, res) => {
     }
 };
 
+const isWishlisted = async (req, res) => {
+    const { _id, role } = req.user;
+    const { productId, type } = req.body;
+
+    try {
+        if (role !== 'Customer') return res.status(403).json({ message: "Unauthorized" });
+
+        let query, params;
+
+        if (type === 'seller') {
+            query = 'SELECT * FROM wishlist WHERE CustomerID = ? AND SellerInventoryID = ?';
+            params = [_id, productId];
+        } else if (type === 'product') {
+            query = 'SELECT * FROM wishlist WHERE CustomerID = ? AND ProductID = ?';
+            params = [_id, productId];
+        } else {
+            return res.status(400).json({ message: "Invalid type" });
+        }
+
+        const [wishlistRows] = await pool.query(query, params);
+
+        if (wishlistRows.length > 0) {
+            return res.status(200).json({ isWishlisted: true });
+        } else {
+            return res.status(200).json({ isWishlisted: false });
+        }
+
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).json({ error: "Failed to check wishlist", details: error.message });
+    }
+};
+
+const handleWishlist = async (req, res) => {
+    const { _id, role } = req.user;
+    const { productId, type, isWishlisted } = req.body;
+
+    if (role !== 'Customer') {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    try {
+        if (type === 'seller') {
+            if (!isWishlisted) {
+                await pool.execute(
+                    'DELETE FROM wishlist WHERE CustomerID = ? AND SellerInventoryID = ?',
+                    [_id, productId]
+                );
+                return res.status(200).json({ message: "Removed from wishlist" });
+            } else {
+                const [rows] = await pool.execute(
+                    'SELECT ProductID FROM sellerInventory WHERE SellerInventoryID = ?',
+                    [productId]
+                );
+
+                if (rows.length === 0) {
+                    return res.status(404).json({ message: "Seller inventory item not found" });
+                }
+
+                const productID = rows[0].ProductID;
+
+                // ✅ Check before inserting
+                const [existing] = await pool.execute(
+                    'SELECT * FROM wishlist WHERE CustomerID = ? AND ProductID = ? AND SellerInventoryID = ?',
+                    [_id, productID, productId]
+                );
+
+                if (existing.length > 0) {
+                    return res.status(200).json({ message: "Already in wishlist" });
+                }
+
+                await pool.execute(
+                    'INSERT INTO wishlist (CustomerID, ProductID, SellerInventoryID) VALUES (?, ?, ?)',
+                    [_id, productID, productId]
+                );
+
+                return res.status(200).json({ message: "Added to wishlist" });
+            }
+
+        } else if (type === 'product') {
+            if (!isWishlisted) {
+                await pool.execute(
+                    'DELETE FROM wishlist WHERE CustomerID = ? AND ProductID = ? AND SellerInventoryID IS NULL',
+                    [_id, productId]
+                );
+                return res.status(200).json({ message: "Removed from wishlist" });
+            } else {
+                // ✅ Check before inserting
+                const [existing] = await pool.execute(
+                    'SELECT * FROM wishlist WHERE CustomerID = ? AND ProductID = ? AND SellerInventoryID IS NULL',
+                    [_id, productId]
+                );
+
+                if (existing.length > 0) {
+                    return res.status(200).json({ message: "Already in wishlist" });
+                }
+
+                await pool.execute(
+                    'INSERT INTO wishlist (CustomerID, ProductID) VALUES (?, ?)',
+                    [_id, productId]
+                );
+
+                return res.status(200).json({ message: "Added to wishlist" });
+            }
+
+        } else {
+            return res.status(400).json({ message: "Invalid wishlist type" });
+        }
+
+    } catch (error) {
+        console.error("Database Error in handleWishlist:", error);
+        return res.status(500).json({ error: "Failed to handle wishlist", details: error.message });
+    }
+};
+
+const removeFromWishlist = async(req, res) => {
+    const { _id, role } = req.user;
+    const { WishlistID } = req.body;
+
+    if (role !== 'Customer') return res.status(403).json({ message: "Unauthorized" });
+
+    try {
+        pool.query(
+            'DELETE FROM wishlist WHERE WishlistID = ?',
+            [WishlistID]
+        )
+
+        res.status(200).status({message: "Product removed from wishlist"});
+    } catch(error) {
+        console.error("Database Error in handleWishlist:", error);
+        return res.status(500).json({ error: "Failed to handle wishlist", details: error.message });
+    }
+}
+
+const isCarted = async (req, res) => {
+    const { _id, role } = req.user;
+    const { SellerInventoryID } = req.body;
+
+    try {
+        if (role !== 'Customer') return res.status(403).json({ message: "Unauthorized" });
+
+        const [cartRows] = await pool.query(
+            'SELECT * FROM cart WHERE CustomerID = ? AND SellerInventoryID = ?',
+            [_id, SellerInventoryID]
+        );
+
+        if (cartRows.length > 0) {
+            return res.status(200).json({ isCarted: true });
+        } else {
+            return res.status(200).json({ isCarted: false });
+        }
+
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).json({ error: "Failed to check cart", details: error.message });
+    }
+};
+
+const handleCart = async (req, res) => {
+    const { _id, role } = req.user;
+    const { SellerInventoryID, isCarted } = req.body;
+
+    if (role !== 'Customer') {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    try {
+        if (!isCarted) {
+            await pool.execute(
+                'DELETE FROM cart WHERE CustomerID = ? AND SellerInventoryID = ?',
+                [_id, SellerInventoryID]
+            );
+            return res.status(200).json({ message: "Removed from wishlist" });
+        } else {
+
+            // ✅ Check before inserting
+            const [existing] = await pool.execute(
+                'SELECT * FROM cart WHERE CustomerID = ? AND SellerInventoryID = ?',
+                [_id, SellerInventoryID]
+            );
+
+            if (existing.length > 0) {
+                return res.status(200).json({ message: "Already in cart" });
+            }
+
+            await pool.execute(
+                'INSERT INTO cart (CustomerID, SellerInventoryID) VALUES (?, ?)',
+                [_id, SellerInventoryID]
+            );
+
+            return res.status(200).json({ message: "Added to cart" });
+        }
+
+    } catch (error) {
+        console.error("Database Error in cart:", error);
+        return res.status(500).json({ error: "Failed to handle cart", details: error.message });
+    }
+};
+
+const getCart = async (req, res) => {
+    const { _id, role } = req.user;
+
+    try {
+        if (role !== 'Customer') {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        const [cartedProductRows] = await pool.query(
+            `SELECT 
+                c.SellerInventoryID,
+                c.Quantity,
+                si.Price,
+                si.Discount,
+                si.CurrentStock,
+                i.*
+             FROM cart c
+             JOIN sellerinventory si ON c.SellerInventoryID = si.SellerInventoryID
+             JOIN inventory i ON si.ProductID = i.ProductID
+             WHERE c.CustomerID = ?`,
+            [_id]
+        );
+
+        res.status(200).json({ cartedProducts: cartedProductRows });
+    } catch (error) {
+        console.error("Database Error in cart:", error);
+        return res.status(500).json({ error: "Failed to fetch cart", details: error.message });
+    }
+};
+
+const getWishlist = async (req, res) => {
+    const { _id, role } = req.user;
+
+    if (role !== 'Customer') {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [wishlistedProducts] = await pool.execute(
+            `SELECT 
+                w.WishlistID,
+                w.SellerInventoryID,
+                i.*,
+                si.Price,
+                si.Discount,
+                si.CurrentStock
+             FROM wishlist w
+             JOIN inventory i ON w.ProductID = i.ProductID
+             LEFT JOIN sellerinventory si ON w.SellerInventoryID = si.SellerInventoryID
+             WHERE w.CustomerID = ?`,
+            [_id]
+        );
+
+        res.status(200).json({ wishlistedProducts });
+    } catch (error) {
+        console.error("Database Error in getWishlist:", error);
+        return res.status(500).json({ error: "Failed to fetch wishlist", details: error.message });
+    }
+};
+
+const handleCartQuantity = async (req, res) => {
+    const { _id, role } = req.user;
+    const { SellerInventoryID, newQuantity } = req.body;
+
+    try {
+        if (role !== 'Customer') {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        await pool.query(
+            'UPDATE cart SET Quantity = ? WHERE SellerInventoryID = ? AND CustomerID = ?',
+            [newQuantity, SellerInventoryID, _id]
+        );
+
+        res.status(200).json({ message: "Quantity changed successfully" });
+
+    } catch (error) {
+        console.error("Database Error in cart:", error);
+        return res.status(500).json({ error: "Failed to change cart quantity", details: error.message });
+    }
+};
+
+
 module.exports = {
     CustomerRegister,
     CustomerLogin,
     CustomerDetails,
-
+    isWishlisted,
+    handleWishlist,
+    removeFromWishlist,
+    isCarted,
+    handleCart,
+    getCart,
+    getWishlist,
+    handleCartQuantity,
 }

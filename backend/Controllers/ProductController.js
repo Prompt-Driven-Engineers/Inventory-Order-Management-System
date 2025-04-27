@@ -216,15 +216,7 @@ const getProductById = async (req, res) => {
     }
 };
 
-const addToWishlist = async(req, res) => {
-    const { _id, role } = req.user;
-    const {productId, type, } = req.body;
-    try {
 
-    } catch(error) {
-
-    }
-}
 
 
 module.exports = {
@@ -232,5 +224,4 @@ module.exports = {
     SearchProduct,
     getProductByTerm,
     getProductById,
-    addToWishlist,
 };

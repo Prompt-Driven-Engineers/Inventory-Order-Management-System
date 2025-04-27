@@ -95,7 +95,6 @@ export default function ProductList() {
     });
     const result = await response.json();
     setFilteredProducts(result.length ? result : []);
-    console.log(result);
   }
 
   // const dynamicAttributes = currentPrdctType ? (productCategories.productTypes[currentPrdctType]?.attributes || []) : [];
@@ -130,6 +129,16 @@ export default function ProductList() {
   //   setFilteredProducts(result.length ? result : []);
     
   }
+
+  const getFirstImage = (imagesString) => {
+    try {
+      const imagesArray = JSON.parse(imagesString);
+      return imagesArray.length > 0 ? imagesArray[0] : null;
+    } catch (error) {
+      console.error("Invalid images format", error);
+      return null;
+    }
+  };
     
   return (
     <div className="flex w-full">
@@ -189,15 +198,15 @@ export default function ProductList() {
                 >
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
-                  {product.images && product.images.length > 0 ? (
+                  {getFirstImage(product.images) ? (
                     <img
-                      // src={`http://localhost:3000/${product.images[0]}`} // Show the first image
-                      alt={product.name}
-                      className="w-full h-full object-contain rounded-lg"
+                        src={getFirstImage(product.images)}
+                        alt={product.Name}
+                        className="w-full h-full object-contain rounded-lg"
                     />
-                  ) : (
+                    ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-lg">
-                      <span className="text-gray-500 text-sm">No Image</span>
+                        <span className="text-gray-500 text-sm">No Image</span>
                     </div>
                   )}
                 </div>

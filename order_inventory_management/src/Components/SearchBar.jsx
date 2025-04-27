@@ -34,9 +34,9 @@ export default function SearchBar({}) {
 
     const onSuggestionSelected = async (event, { suggestion }) => {
         setSearchedProduct(suggestion.Name);
-        if (onProductSelect) {
-            onProductSelect(suggestion);
-        }
+        // if (onProductSelect) {
+        //     onProductSelect(suggestion);
+        // }
     };
 
     const inputProps = {

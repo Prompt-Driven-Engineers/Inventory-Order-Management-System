@@ -36,11 +36,9 @@ function App() {
 
   useEffect(() => {
     const checkLogin = async () => {
-      console.log("Working");
       try {
         const res = await axios.get('http://localhost:8000/auth/check-auth', { withCredentials: true });
         if (res.data.isLoggedIn) {
-          console.log("Logged in");
           setIsLoggedIn(true);
           setUser(res.data.user);
         }
