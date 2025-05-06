@@ -169,7 +169,7 @@ const getProductById = async (req, res) => {
 
         if (type === "seller") {
             const [sellerRows] = await connection.execute(
-                `SELECT ProductID, SellerID, Price, Discount, CurrentStock 
+                `SELECT SellerInventoryID, ProductID, SellerID, Price, Discount, CurrentStock 
                  FROM sellerInventory 
                  WHERE SellerInventoryID = ?`,
                 [id]
@@ -216,7 +216,77 @@ const getProductById = async (req, res) => {
     }
 };
 
+const getProductsByIds = async (req, res) => {
+    const { ids } = req.body;
+    console.log(ids);
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: "Invalid or empty ID list" });
+    }
 
+    try {
+        const placeholders = ids.map(() => '?').join(',');
+        const [rows] = await pool.execute(
+            `SELECT 
+                si.SellerInventoryID,
+                si.Price,
+                si.Discount,
+                si.CurrentStock,
+                i.*
+             FROM sellerinventory si
+             JOIN inventory i ON si.ProductID = i.ProductID
+             WHERE si.SellerInventoryID IN (${placeholders})`,
+            ids
+        );
+
+        res.status(200).json({ products: rows });
+    } catch (error) {
+        console.error("Error fetching seller inventory by IDs:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}
+
+const placeOrder = async (req, res) => {
+    const { CustomerID, ShippingAddressID, items, TotalAmount } = req.body;
+  
+    if (!CustomerID || !ShippingAddressID || !items || items.length === 0 || !TotalAmount) {
+      return res.status(400).json({ message: "Missing required order details" });
+    }
+  
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+  
+      // 1. Insert into orders table
+      const [orderResult] = await connection.query(
+        `INSERT INTO orders (CustomerID, ShippingAddressID, TotalAmount, PaymentMethod)
+         VALUES (?, ?, ?, 'COD')`,
+        [CustomerID, ShippingAddressID, TotalAmount]
+      );
+  
+      const OrderID = orderResult.insertId;
+  
+      // 2. Insert each item into orderdetails
+      const orderDetailPromises = items.map(item => {
+        return connection.query(
+          `INSERT INTO orderdetails (OrderID, Price, Quantity, SellerInventoryID)
+           VALUES (?, ?, ?, ?)`,
+          [OrderID, item.Price, item.Quantity, item.SellerInventoryID]
+        );
+      });
+  
+      await Promise.all(orderDetailPromises);
+  
+      await connection.commit();
+      res.status(201).json({ message: "Order placed successfully", orderId: OrderID });
+    } catch (error) {
+      await connection.rollback();
+      console.error("❌ Order placement failed:", error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    } finally {
+      connection.release();
+    }
+  };
+  
 
 
 module.exports = {
@@ -224,4 +294,6 @@ module.exports = {
     SearchProduct,
     getProductByTerm,
     getProductById,
+    getProductsByIds,
+    placeOrder
 };

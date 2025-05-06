@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
   const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
+
+  const browseHandler = (value) => {
+    if(value) {
+      navigate(`/find/${searchedProduct}`);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col w-full">

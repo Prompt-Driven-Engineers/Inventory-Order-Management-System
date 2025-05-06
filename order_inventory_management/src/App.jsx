@@ -29,6 +29,7 @@ import axios from "axios";
 import Cart from './Components/Cart';
 import Wishlist from './Components/Wishlist';
 import ProductPage from './Components/ProductPage';
+import OrderPage from './Components/OrderPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -45,7 +46,6 @@ function App() {
       } catch (err) {
         setIsLoggedIn(false);
         setUser(null);
-        console.log(err);
       }
     };
     checkLogin();
@@ -59,7 +59,7 @@ function App() {
       />
       <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn}/>
       <Routes>
-          {/* <Route path='/' element={<HomePage />} /> */}
+          <Route path='/advanceHome' element={<HomePage />} />
           <Route path='/' element={<UserHomePage />} />
           {/* register paths */}
           <Route path='/sellerReg' element={<SellerRegister />} />
@@ -69,7 +69,9 @@ function App() {
           {/* login paths */}
           <Route path='/userLogin' element={<UserLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/sellerLog' element={<SellerLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          <Route path='/customerLog' element={<CustomerLogin />} />
+          {isLoggedIn ? <Route path='/customerLog' element={<HomePage />} />
+          : <Route path='/customerLog' element={<CustomerLogin />} />
+          }
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
@@ -84,7 +86,7 @@ function App() {
           {/* DashBoards */}
           <Route path='/adminDash' element={<AdminDashboard />} />
           <Route path='/sellerDash' element={<SellerDashboard />} />
-          <Route path='/customerDash' element={<CustomerDashboard />} />
+          <Route path='/customerDash' element={<CustomerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/whmDash' element={<WHMDashBoard />} />
 
           {/* other paths */}
@@ -96,6 +98,7 @@ function App() {
           <Route path="/visit/:productId" element={<ProductPage isLoggedIn={isLoggedIn} user={user} />} />
           <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />} />
           <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
+          <Route path="/orderProduct" element={<OrderPage isLoggedIn={isLoggedIn} user={user} />} />
       </Routes>
     </Router>
   );

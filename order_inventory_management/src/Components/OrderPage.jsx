@@ -1,119 +1,135 @@
-import {React, useState, useEffect, useContext} from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { UserContext } from '../context/UserContext';
+import { React, useState, useEffect, useContext } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import axios from "axios";
+import { toast } from 'react-toastify';
 
-export default function OrderPage({isUserLoggedIn}) {
-    const [orderData, setOrderData] = useState({
-        customerId: '',
-        vendorId: '',
-        shippingAddress: [],
-        items: [
-          {
-            productId: '',
-            quantity: 1,
-            priceAtPurchase: 0,
-          },
-        ],
-      });
-      const { productId } = useParams();
-      const [product, setProduct] = useState(null);
-      const { user } = useContext(UserContext);
-    
-      // Handler to submit form data
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        // Here you would send `orderData` to the backend
-        console.log('Submitting Order Data:', orderData);
-      };
+export default function OrderPage({ isLoggedIn, user }) {
+  const [orderedProducts, setOrderedProducts] = useState([]);
 
-      const fetchById = async () => {
-        try {
-            const response = await fetch(`http://localhost:3000/products/getById?id=${productId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const result = await response.json();
-            setProduct(result);  // Set product directly
+  const [oProducts, setOproducts] = useState([]);
+  const location = useLocation();
+  const sellerInventoryIDs = location.state?.SellerInventoryIDs || [];
+  const [customer, setCustomer] = useState();
+  const navigate = useNavigate();
 
-            // Update orderData state
-            setOrderData((prevOrderData) => ({
-              ...prevOrderData, // Retain the existing state
-              vendorId: result.vendorId, // Update vendorId
-              items: [
-                {
-                  productId: result._id, // Assuming result._id contains the product ID
-                  quantity: 1, // Default quantity
-                  priceAtPurchase: Math.round(result.price - (result.price * (result.discountPercentage/100))), // Assuming result.price contains the price
-                },
-              ],
-            }));
-
-        } catch (error) {
-            console.error('Error fetching product:', error);
-        }
-    };
-    
-    useEffect(() => {
-      fetchById();
-    }, [productId]); // Ensure the effect runs when productId changes    
-
-    useEffect(() => {
-      if (isUserLoggedIn) {
-        setOrderData((prevOrderData) => ({
-          ...prevOrderData, // Spread the previous state to retain other properties
-          customerId: user._id,
-          shippingAddress: user.addresses, // Assign the user's addresses to shippingAddress
-        }));
-      }
-    }, [user, isUserLoggedIn]); // Ensure dependencies include isUserLoggedIn and user   
-    
-    const takeOrder = async() => {
+  useEffect(() => {
+    const fetchOrderedProducts = async () => {
       try {
-        const response = await fetch('http//localhost:3000/users/orderProduct', {
+        const response = await fetch('http://localhost:8000/products/getByIds', {
           method: 'POST',
-          body: orderData,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: sellerInventoryIDs }) // sellerInventoryIDs is an array
         });
-        
-        if(response.ok) {
-          console.log('Order placed successfully');
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setOrderedProducts(result.products);
+          const productsWithQuantity = result.products.map(p => ({
+            SellerInventoryID: p.SellerInventoryID,
+            Quantity: 1,
+            Price: Math.round(p.Price - p.Price * (p.Discount / 100))
+          }));
+          setOproducts(productsWithQuantity);
         } else {
-          console.log('error occured');
+          console.warn('⚠️ Error fetching products:', result.message);
         }
-      } catch(error) {
-        console.log(error);
+      } catch (error) {
+        console.error('❌ Network error while fetching products:', error);
       }
+    };
+
+    fetchOrderedProducts();
+  }, [sellerInventoryIDs]); // run when sellerInventoryIDs changes  
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      axios.get(`http://localhost:8000/customers/customerDetails`, {
+        withCredentials: true
+      })
+        .then((res) => {
+          setCustomer(res.data); // ✅ Store only the response data
+        })
+        .catch((err) => {
+          console.error("Error fetching customer:", err);
+          setCustomer(null); // Ensure state is handled on error
+        });
     }
 
-    // const <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg"></div>
+  }, [user, isLoggedIn]); // Ensure dependencies include isLoggedIn and user   
+
+  // Calculate all prices
+  const calculateSubtotal = () =>
+    oProducts.reduce(
+      (sum, p) =>
+        sum + p.Quantity * p.Price,
+      0
+    );
+
+  const calculatePlatformFee = () => oProducts.length * 3;
+
+  const calculateDeliveryFee = () => (calculateSubtotal() > 500 ? 0 : 40);
+
+  const calculateTotal = () =>
+    Number(calculateSubtotal() + calculatePlatformFee() + calculateDeliveryFee());
+
+  // Place Order Function (API logic can be added here)
+  const placeOrder = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/products/placeOrder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          CustomerID: user._id,
+          ShippingAddressID: customer.addresses[0].AddressID,
+          items: oProducts,
+          TotalAmount: calculateTotal(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Order placed successfully!");
+        navigate('/customerDash', { replace: true});
+      } else {
+        console.warn("⚠️ Order failed:", result.message);
+        // toast.error("Order failed: " + result.message);
+      }
+    } catch (error) {
+      console.error("❌ Network error:", error);
+      // toast.error("Something went wrong. Try again.");
+    }
+  };
+
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md space-y-6">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md space-y-6">
         {/* Shipping Address Section */}
-        {user && (
-          <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Shipping Address</h3>
-            <p className="text-gray-600">{user.addresses[0].label}, {user.addresses[0].street}, {user.addresses[0].city}, {user.addresses[0].state} - {user.addresses[0].zipCode}</p>
-          </div>
-        )}
-
-        {/* Product Section */}
-        {product && (
-          <div className="space-y-4">
-            <div
-              onClick={() => navigate(`/visit/${product._id}`)}
-              className="flex bg-gray-50 p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition ease-in-out cursor-pointer">
-              {/* Product Image */}
-              <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
-              {product.images && product.images.length > 0 ? (
+        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Shipping Address</h3>
+          {customer && (
+            customer.addresses.map(address => (
+              <div key={address.AddressID}>
+                <p>{address.AddressType}</p>
+                <p className="text-gray-600">{address.Landmark}, {address.Street}, {address.City}, {address.State} - {address.Zip}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="max-w-3xl mx-auto p-6">
+          {orderedProducts.map(product => (
+            <div key={product.SellerInventoryID || product.ProductID} className="space-y-4 mb-6">
+              <div
+                className="flex bg-gray-50 p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition ease-in-out cursor-pointer"
+              >
+                {/* Product Image */}
+                <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
+                  {product.ImageURL ? (
                     <img
-                      src={`http://localhost:3000/${product.images[0]}`} // Show the first image
-                      alt={product.name}
+                      // src={`http://localhost:3000/${product.ImageURL}`}
+                      alt={product.ProductName}
                       className="w-full h-full object-contain rounded-lg"
                     />
                   ) : (
@@ -121,59 +137,127 @@ export default function OrderPage({isUserLoggedIn}) {
                       <span className="text-gray-500 text-sm">No Image</span>
                     </div>
                   )}
-              </div>
+                </div>
 
-              {/* Product Details */}
-              <div className="flex-grow">
-                <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-                <p className="text-sm text-gray-500 mt-1">Brand: {product.brand}</p>
-                <p className="text-green-600 font-bold text-lg mt-2">
-                  ₹{Math.round(product.price - product.price * (product.discountPercentage / 100))}/- &nbsp;
-                  <span className="line-through text-red-500 text-sm">₹{product.price}</span>
-                </p>
+                {/* Product Info */}
+                <div className="flex-grow">
+                  <h3
+                    className="text-lg font-semibold text-gray-800"
+                    onClick={() => {
+                      const type = "seller";
+                      navigate(`/visit/${product.SellerInventoryID}?type=${type}`);
+                    }}
+                  >{product.Name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">Brand: {product.Brand}</p>
+                  <p className="text-sm text-gray-600 mt-1">₹{product.Price}</p>
+                  <p className="text-sm text-red-600 mt-1">
+                    Discount: ₹{Math.round(product.Price * (product.Discount / 100))}
+                  </p>
+                  <p className="text-green-600 font-bold text-md mt-2">
+                    {(() => {
+                      const match = oProducts.find(p => p.SellerInventoryID === product.SellerInventoryID);
+                      const unitPrice = Math.round(product.Price - product.Price * (product.Discount / 100));
+                      const quantity = match ? parseInt(match.Quantity) : 1;
+                      return `Final Price (${quantity} × ₹${unitPrice}): ₹${quantity * unitPrice}`;
+                    })()}
+                  </p>
+
+
+                  {/* Quantity Buttons */}
+                  <div className="flex items-center mt-2 space-x-2">
+                    <div className="flex items-center space-x-2">
+                      {/* Decrease Button */}
+                      <button
+                        onClick={() =>
+                          setOproducts(prev =>
+                            prev.map(item =>
+                              item.SellerInventoryID === product.SellerInventoryID
+                                ? { ...item, Quantity: Math.max(1, item.Quantity - 1) }
+                                : item
+                            )
+                          )
+                        }
+                        className="px-2 py-1 bg-gray-200 rounded text-sm"
+                      >
+                        −
+                      </button>
+
+                      {/* Quantity Display */}
+                      <span className="min-w-[24px] text-center">
+                        {
+                          oProducts.find(p => p.SellerInventoryID === product.SellerInventoryID)?.Quantity || 1
+                        }
+                      </span>
+
+                      {/* Increase Button */}
+                      <button
+                        onClick={() =>
+                          setOproducts(prev =>
+                            prev.map(item =>
+                              item.SellerInventoryID === product.SellerInventoryID
+                                ? { ...item, Quantity: item.Quantity + 1 }
+                                : item
+                            )
+                          )
+                        }
+                        className="px-2 py-1 bg-gray-200 rounded text-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
               </div>
             </div>
+          ))}
 
-            {/* Price Breakdown Section */}
-            <div className="bg-gray-50 p-4 border border-gray-200 rounded-md space-y-2">
-              <h4 className="text-lg font-semibold text-gray-700">Price Details:</h4>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Price:</span>
-                <span>₹{product.price}</span>
+          {/* Cart Summary */}
+          {orderedProducts.length > 0 && (
+            <div className="bg-white p-6 border border-gray-300 rounded-lg mt-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
+
+              {/* Subtotal */}
+              <div className="flex justify-between text-sm text-gray-700 mb-2">
+                <span>Subtotal (after discounts):</span>
+                <span>₹{calculateSubtotal()}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Discount:</span>
-                <span className="text-red-500">-₹{Math.round(product.price * (product.discountPercentage / 100))}</span>
+
+              {/* Platform Fee */}
+              <div className="flex justify-between text-sm text-gray-700 mb-2">
+                <span>Platform Fee (₹3 × {orderedProducts.length}):</span>
+                <span>₹{calculatePlatformFee()}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Platform Fee:</span>
-                <span>₹3</span>
+
+              {/* Delivery Charges */}
+              <div className="flex justify-between text-sm text-gray-700 mb-2">
+                <span>Delivery Charge:</span>
+                <span className={calculateDeliveryFee() === 0 ? "text-green-600 font-medium" : ""}>
+                  ₹{calculateDeliveryFee()} {calculateDeliveryFee() === 0 && "(Free)"}
+                </span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Delivery Charges:</span>
-                <span>₹40</span>
-              </div>
-              <hr className="border-t border-gray-300" />
-              <div className="flex justify-between text-base font-semibold text-gray-800">
+
+              <hr className="my-2 border-t border-gray-300" />
+
+              {/* Grand Total */}
+              <div className="flex justify-between text-base font-semibold text-gray-900">
                 <span>Total Amount:</span>
-                <span>₹{Math.round(product.price - product.price * (product.discountPercentage / 100)) + 3 + 40}</span>
+                <span>₹{calculateTotal()}</span>
+              </div>
+
+              {/* Place Order Button */}
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={placeOrder}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition ease-in-out"
+                >
+                  Place Order
+                </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            onClick={orderProduct}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition ease-in-out">
-            Pay Now
-          </button>
+          )}
         </div>
-      </form>
+      </div>
     </>
-
   )
 }

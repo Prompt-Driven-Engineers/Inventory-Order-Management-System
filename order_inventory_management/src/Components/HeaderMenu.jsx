@@ -1,161 +1,112 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-    ShoppingCartIcon, 
-    HeartIcon, 
-    UserIcon, 
-    ArrowRightOnRectangleIcon as LogoutIcon, 
-    ArrowLeftOnRectangleIcon as LoginIcon, 
-    MagnifyingGlassIcon as SearchIcon,
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+    ShoppingCartIcon,
+    ArrowLeftOnRectangleIcon as LoginIcon,
     ClipboardDocumentCheckIcon,
     ArchiveBoxIcon
 } from '@heroicons/react/24/solid';
 import SearchBar from './SearchBar';
-import axios from "axios";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function HeaderMenu({isUserLoggedIn, isLoggedIn, user, setUser, setIsLoggedIn, isVendorLoggedIn}) {
+export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
 
-    const [searchedProduct, setSearchedProduct] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const handleLogout = async() => {
-        try {
-            await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
-            setIsLoggedIn(false); // clear your app state
-            setUser(null);
-            navigate('/');   // optional redirect
-            } catch (err) {
-            console.error('Logout failed:', err);
-            }
+    const handleNavigate = (path) => {
+        if(location.pathname !== path) navigate(path);
     }
 
-    const fetchSearchedData = async() => {
-        if(!searchedProduct) {
-            return;
-        }
-    
-        navigate(`/search/${searchedProduct}`);
-    }
+    return (
+        <>
+            <div className="box-border flex justify-around border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
 
-  return (
-    <>
-        <div className="box-border flex justify-around border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
+                {/* Logo Section */}
+                <div className="flex items-center">
+                    <div onClick={() => handleNavigate('/')} className="flex items-center space-x-1 text-gray-900 font-bold text-2xl cursor-pointer">
+                        <span className="text-blue-500">Secure</span>
+                        <span className="text-green-500">Cart</span>
+                    </div>
+                </div>
+                <div className="flex w-full max-w-1/2 mx-4 md:mx-8">
+                    <SearchBar />
+                </div>
 
-            {/* Logo Section */}
-            <div className="flex items-center">
-                <div onClick={() => {navigate('/')}} className="flex items-center space-x-1 text-gray-900 font-bold text-2xl cursor-pointer">
-                    <span className="text-blue-500">Secure</span>
-                    <span className="text-green-500">Cart</span>
+                {/* User and Logout Section */}
+                <div className="flex items-center space-x-2">
+                    {!isVendorLoggedIn && (
+                        <div className="flex items-center  px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-300 transition-all duration-300">
+                            <button onClick={() => handleNavigate('/sellerReg')}>
+                                {/* <UserIcon className="h-5 w-5 mr-2" /> */}
+                                Become a Seller
+                            </button>
+                        </div>
+                    )}
+                    {isLoggedIn ? (
+                        <div 
+                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-2xl cursor-pointer hover:bg-blue-600 transition-all duration-300"
+                            onClick={() => handleNavigate('/customerDash')}
+                        >
+                            <span className="text-sm font-medium">
+                                {(user?.email?.slice(0, 1) || '').toUpperCase()}
+                            </span>
+                        </div>
+
+                    ) : (
+                        <div
+                            onClick={() => handleNavigate('/userLogin')}
+                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-600 transition-all duration-300"
+                        >
+                            <LoginIcon className="h-5 w-5 mr-2" />
+                            Login
+                        </div>
+                    )}
+                </div>
+
+                {/* Cart and Wishlist Section */}
+                <div className="flex items-center space-x-4">
+                    {(user?.role !== 'Admin' && user?.role !== 'Seller') && (
+                        <>
+                            <button
+                                onClick={() => {
+                                    if (isLoggedIn) {
+                                        handleNavigate('/cart');
+                                    } else {
+                                        handleNavigate('/userLogin');
+                                        toast.info("Please login to access your cart");
+                                    }
+                                }}
+                                className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
+                            >
+                                <ShoppingCartIcon className="h-5 w-5 mr-1" />
+                                Cart
+                            </button>
+                        </>
+                    )}
+
+                    {isVendorLoggedIn && (
+                        <>
+                            {shouldShowProducts && <button
+                                onClick={() => handleNavigate('/vendorDash')}
+                                className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
+                            >
+                                <ArchiveBoxIcon className="h-5 w-5 mr-1" />
+                                Your Products
+                            </button>}
+                            <button
+                                // onClick={() => { navigate('/wishlist'); }} 
+                                className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
+                            >
+                                <ClipboardDocumentCheckIcon className="h-5 w-5 mr-1" />
+                                Orders
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
-            <div className="flex w-full mx-4 md:mx-8">
-                <SearchBar />
 
-                <button
-                    // onClick={fetchSearchedData}
-                    className="bg-blue-500 text-white p-2 px-3 rounded-r-lg hover:bg-blue-600 transition-all duration-300 flex items-center"
-                >
-                    <SearchIcon className="h-5 w-5" />
-                </button>
-            </div>
-
-            {/* User and Logout Section */}
-            <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
-                    <div className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-2xl cursor-pointer hover:bg-blue-600 transition-all duration-300">
-                    <span className="text-sm font-medium">
-                        {(user?.email?.slice(0, 1) || '').toUpperCase()}
-                    </span>
-                </div>
-                
-                ) : (
-                    <div
-                        onClick={() => { navigate('/userLogin'); }}
-                        className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-600 transition-all duration-300"
-                    >
-                        <LoginIcon className="h-5 w-5 mr-2" />
-                        Login
-                    </div>
-                )}
-
-                {isLoggedIn && 
-                    <div 
-                        onClick={handleLogout} 
-                        className="flex items-center bg-gray-300 text-gray-700 px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-gray-400 transition-all duration-300"
-                    >
-                        <LogoutIcon className="h-5 w-5 mr-2" />
-                        Logout
-                    </div>
-                }
-
-                {!isVendorLoggedIn && (
-                    <div className="flex items-center  px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-300 transition-all duration-300">
-                        <button onClick={() => { navigate('/sellerReg'); }}>
-                            {/* <UserIcon className="h-5 w-5 mr-2" /> */}
-                            Become a Seller
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Cart and Wishlist Section */}
-            <div className="flex items-center space-x-4">
-                {(user?.role !== 'Admin' && user?.role !== 'Seller') && (
-                    <>
-                        <button 
-                            onClick={() => { 
-                                if(isLoggedIn) {
-                                    navigate('/cart');
-                                } else {
-                                    navigate('/userLogin');
-                                    toast.info("Please login to access your cart");
-                                }
-                            }} 
-                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
-                        >
-                            <ShoppingCartIcon className="h-5 w-5 mr-1" />
-                            Cart
-                        </button>
-                        <button 
-                            onClick={() => { 
-                                if(isLoggedIn) {
-                                    navigate('/wishlist');
-                                } else {
-                                    navigate('/userLogin');
-                                    toast.info("Please login to access your Wishlist");
-                                }
-                            }}
-                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
-                        >
-                            <HeartIcon className="h-5 w-5 mr-1" />
-                            Wishlist
-                        </button>
-                    </>
-                )}
-
-                {isVendorLoggedIn && (
-                    <>
-                        {shouldShowProducts && <button 
-                            onClick={() => { navigate('/vendorDash'); }} 
-                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
-                        >
-                            <ArchiveBoxIcon className="h-5 w-5 mr-1" />
-                            Your Products
-                        </button>}
-                        <button 
-                            // onClick={() => { navigate('/wishlist'); }} 
-                            className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
-                        >
-                            <ClipboardDocumentCheckIcon className="h-5 w-5 mr-1" />
-                            Orders
-                        </button>
-                    </>
-                )}
-            </div>
-        </div>
-
-    </>
-  )
+        </>
+    )
 }

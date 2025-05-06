@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from 'react-toastify';
 
 export default function UserLogin({ setUser, setIsLoggedIn }) {
     // State to track which tab is active (default is 'customer')
@@ -59,11 +60,11 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     
                 const result = await response.json();
                 if (!response.ok) {
-                    alert(result.error || 'Something went wrong')
+                    toast.error(result.error || 'Something went wrong');
                 } else {
                     setIsLoggedIn(true);
-                    navigate(`/customerDash`);
-                    alert("Login successful!"); // Show success message to the user
+                    navigate(`/customerDash`, {replace: true});
+                    toast.success("Login successful!");
                 }
     
             } catch(error) {
@@ -179,7 +180,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 {/* New User Call to Action */}
                 <div className="text-center mt-4">
                     <p className="text-gray-600">Don't have an account?</p>
-                    <a href="/userReg" className="text-blue-500 font-semibold hover:underline">Sign up now</a>
+                    <a onClick={() => navigate('/customerReg')} className="text-blue-500 font-semibold hover:underline">Sign up now</a>
                 </div>
 
                 {/* Quick Links */}

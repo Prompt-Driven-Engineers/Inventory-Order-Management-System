@@ -33,6 +33,10 @@ export default function SearchBar({}) {
     );
 
     const onSuggestionSelected = async (event, { suggestion }) => {
+        // console.log(searchedProduct);
+        if(searchedProduct) {
+            navigate(`/find/${searchedProduct}`);
+        }
         setSearchedProduct(suggestion.Name);
         // if (onProductSelect) {
         //     onProductSelect(suggestion);
@@ -51,7 +55,7 @@ export default function SearchBar({}) {
           }
         },
         className:
-          "w-full rounded-l-lg p-2 font-medium bg-white border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+          "w-full rounded-lg p-2 font-medium bg-white border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
     };
     return (
         <div className="relative w-full">

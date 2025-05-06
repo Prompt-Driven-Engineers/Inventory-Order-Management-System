@@ -12,8 +12,11 @@ export default function UserHomePage() {
         allProductTypes = [...allProductTypes, ...productTypes];
     });
     
-    const handleClickCat = (category) => {
-        navigate(`/products/${category}`); // Navigate to the types page for a specific category
+    const handleBrowse = (value) => {
+        if(value === 'HomeAppliances') navigate(`/find/${'home appliances'}`);
+        else if(value === 'AirConditioner') navigate(`/find/${'Air Conditioner'}`);
+        else if(value === 'WashingMachine') navigate(`/find/${'Washing Machine'}`);
+        else navigate(`/find/${value}`);
     };
 
     return (
@@ -24,7 +27,7 @@ export default function UserHomePage() {
         <h1 className="text-4xl font-bold text-white mb-4 ">Welcome to SecureCart!</h1>
         <p className="text-lg text-white mb-6">Find the best deals and offers on our platform</p>
         <button 
-            onClick={() => {handleClickCat('electronics')}}
+            onClick={() => handleBrowse('electronics')}
             className="bg-green-500 text-white px-5 py-2 rounded-md font-semibold hover:bg-green-600 hover:scale-105 active:scale-95 transition-all duration-300 ease-in-out shadow-lg">
             Browse Now
         </button>
@@ -45,7 +48,7 @@ export default function UserHomePage() {
                 {allCategories.map((category, index) => (
                     <div
                         key={index}
-                        onClick={() => handleClickCat(category)}
+                        onClick={() => handleBrowse(category)}
                         className="flex flex-col items-center justify-center h-40 w-40 bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 "
                     >
                         <span className="text-xl font-medium">{category}</span>
@@ -61,7 +64,7 @@ export default function UserHomePage() {
                 {allProductTypes.map((productType, index) => (
                     <div
                         key={index}
-                        onClick={() => {navigate(`/products/${productType}`)}}
+                        onClick={() => handleBrowse(productType)}
                         className="flex flex-col items-center justify-center h-40 w-40 bg-green-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95"
                     >
                         <span className="text-xl font-medium">{productType}</span>
@@ -101,7 +104,7 @@ export default function UserHomePage() {
                 </div>
             </div>
         </div>
-        <div className="text-center text-gray-500 mt-8">© 2024 SecureCart. All rights reserved.</div>
+        <div className="text-center text-gray-500 mt-8">© 2025 SecureCart. All rights reserved.</div>
     </footer>
     
 </div>

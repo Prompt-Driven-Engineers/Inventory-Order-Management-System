@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import productCategories from '../Data/ProductTypeAttributes';
+import { getFirstImage } from "../functions/func";
 
 export default function ProductList() {
   const { type } = useParams(); // Get the product type from the URL
@@ -8,82 +8,16 @@ export default function ProductList() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const { searchedProduct } = useParams(); // Get the product type from the URL
   const [currentPrdctType, setCurrentPrdctType] = useState('');
-  const [currentPrdctCat, setCurrentPrdctCat] = useState('');
   const [dynamicAttributes, setDynamicAttributes] = useState([]);
   const [form, setForm] = useState({});
   const navigate = useNavigate();
   const { filterForm } = useParams();
-  
-
 
   useEffect( () => {
-    chosseAction();
-  }, [searchedProduct, type, category]);
-
-  const chosseAction = async () => {
     if (searchedProduct) {
-      // Fetch by product name
       fetchByName();
-    } else if (type) {
-      // Fetch by type only if category is not provided
-      console.log('fetching from type');
-      fetchByType(type);
-      setCurrentPrdctType(type);
-    } else if (category) {
-      // Fetch by category
-      console.log('fetching from cat');
-      fetchByCategory(category);
-      setCurrentPrdctCat(category);
-    } else if (filterForm) {
-      // Handle filter form
-      const formData = await JSON.parse(decodeURIComponent(filterForm));
-      setForm(formData);
-      console.log(formData);
-      fetchByFilter();
     }
-  };
-  
-
-  useEffect(() => {
-    // Define a local variable to hold the attributes
-    let attributes = [];
-
-    // Loop through productCategories to find the matching productType
-    for (const category in productCategories) {
-      const productTypes = productCategories[category].productTypes;
-      if (productTypes[currentPrdctType]) {
-        attributes = productTypes[currentPrdctType].attributes || [];
-        break;
-      }
-    }
-
-    // Update state with the attributes
-    setDynamicAttributes(attributes);
-  }, [currentPrdctType]); // Rerun this effect when currentProductType changes
-
-  const fetchByType = async(type) => {
-    // setFilteredProducts([]);
-    // const response = await fetch(`http://localhost:3000/products/getByType?type=${type}`, {
-    //   method: 'GET',
-    //   headers:  {
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // const result = await response.json();
-    // setFilteredProducts(result.length ? result : []);
-  };
-
-  const fetchByCategory = async(category) => {
-    // setFilteredProducts([]);
-    // const response = await fetch(`http://localhost:3000/products/getByCat?category=${category}`, {
-    //   method: 'GET',
-    //   headers:  {
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
-    // const result = await response.json();
-    // setFilteredProducts(result.length ? result : []);
-  };
+  }, [searchedProduct]);
 
   const fetchByName = async() => {
     setFilteredProducts([]);
@@ -129,16 +63,6 @@ export default function ProductList() {
   //   setFilteredProducts(result.length ? result : []);
     
   }
-
-  const getFirstImage = (imagesString) => {
-    try {
-      const imagesArray = JSON.parse(imagesString);
-      return imagesArray.length > 0 ? imagesArray[0] : null;
-    } catch (error) {
-      console.error("Invalid images format", error);
-      return null;
-    }
-  };
     
   return (
     <div className="flex w-full">

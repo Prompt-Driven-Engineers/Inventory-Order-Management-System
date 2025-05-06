@@ -2,10 +2,13 @@ import {React, useState, useEffect} from 'react';
 import {useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getFirstImage } from "../functions/func";
+import { fetchCustomer } from '../apiCall/customer';
 
 export default function Cart({isLoggedIn, user}) {
     const [products, setProducts] = useState([]);
     const navigate = useNavigate(); 
+    const [customer, setCustomer] = useState();
 
     const fetchCart = async () => {
         if (!user || user.role !== 'Customer') return; // Only fetch for Customers
@@ -96,25 +99,27 @@ export default function Cart({isLoggedIn, user}) {
     };
 
     const placeOrder = async() => {
-
+        const selectedIds = products.map((product) => product.SellerInventoryID);
+        isLoggedIn ? 
+        navigate(`/orderProduct`, {state: {SellerInventoryIDs: selectedIds}}) 
+        : navigate('/userLogin');
     }
-
-    const getFirstImage = (imagesString) => {
-        try {
-          const imagesArray = JSON.parse(imagesString);
-          return imagesArray.length > 0 ? imagesArray[0] : null;
-        } catch (error) {
-          console.error("Invalid images format", error);
-          return null;
-        }
-    };
       
 
     useEffect(() => {
-        if(isLoggedIn) {
-            fetchCart();
+        async function fetchData () {
+            try{
+                if(isLoggedIn) {
+                    await fetchCart();
+                    const user = await fetchCustomer();
+                    setCustomer(user);
+                }
+            } catch(err) {
+                console.error("Error fetching customer/cart", err);
+            }
         }
-    }, [isLoggedIn, user]);
+        fetchData();
+    }, [isLoggedIn]);
 
     return (
         <>
@@ -129,12 +134,13 @@ export default function Cart({isLoggedIn, user}) {
             {/* User Address */}
             <div className="mb-6 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold mb-4">Shipping Address</h3>
-                { user?.addresses && user.addresses.length > 0 ? (
+                { customer?.addresses && customer.addresses.length > 0 ? (
                     <div>
                         <p className="text-gray-700">
-                            {user.addresses[0].label}, {user.addresses[0].street}, {user.addresses[0].city}, {user.addresses[0].state} - {user.addresses[0].zipCode}
+                            {customer.addresses[0].Street}, {customer.addresses[0].City}, {customer.addresses[0].State}, {customer.addresses[0].Country} - {customer.addresses[0].Zip
+                            }
                         </p>
-                        <p className="text-gray-700">Landmark: {user.addresses[0].landmark}</p>
+                        <p className="text-gray-700">Landmark: {customer.addresses[0].Landmark}</p>
                     </div>
                 ) : (
                     <div className="text-gray-500">
@@ -252,7 +258,10 @@ export default function Cart({isLoggedIn, user}) {
             <p className="text-lg font-semibold">Total Price:</p>
             <p className="text-lg font-bold text-green-600 ml-2">₹{calculateTotalPrice().toFixed(2)}</p>
         </div>
-        <div className='flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300'>
+        <div 
+            className='flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300'
+            onClick={placeOrder}
+        >
             Order Now
         </div>
     </div>

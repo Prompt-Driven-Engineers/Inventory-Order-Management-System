@@ -118,24 +118,36 @@ const CustomerDetails = async (req, res) => {
         }
 
         // Fetch store details
-        const [CustomerAddress] = await pool.query(`SELECT * FROM address WHERE UserID = ?`,
+        const [addressRows] = await pool.query(`SELECT * FROM address WHERE UserID = ?`,
             [_id]
         );
+
+        const [customerRows] = await pool.query(
+            'SELECT SubscriptionStatus, TotalOrders, Points FROM customers WHERE CustomerID = ?',
+            [_id]
+        )
+
+        // Format address list
+        const addresses = addressRows.map(addr => ({
+            AddressID: addr.AddressID,
+            Landmark: addr.Landmark,
+            Street: addr.Street,
+            City: addr.City,
+            State: addr.State,
+            Country: addr.Country,
+            Zip: addr.Zip,
+            AddressType: addr.AddressType
+        }));
 
         // Merge results
         const customerData = {
             name: userResults[0].Name,  
             email: userResults[0].Email,
             phone: userResults[0].Phone,
-            address: {
-                Landmark: CustomerAddress.length > 0 ? CustomerAddress[0].Landmark : null,
-                Street: CustomerAddress.length > 0 ? CustomerAddress[0].Street : null,
-                City: CustomerAddress.length > 0 ? CustomerAddress[0].City : null,
-                State: CustomerAddress.length > 0 ? CustomerAddress[0].State : null,
-                Country: CustomerAddress.length > 0 ? CustomerAddress[0].Country : null,
-                Zip: CustomerAddress.length > 0 ? CustomerAddress[0].Zip : null,
-                AddressType: CustomerAddress.length > 0 ? CustomerAddress[0].AddressType : null,
-            }
+            SubscriptionStatus: customerRows[0].SubscriptionStatus,
+            TotalOrders: customerRows[0].TotalOrders,
+            Points: customerRows[0].Points,
+            addresses
         };
         
         res.status(200).json(customerData);
@@ -427,6 +439,124 @@ const handleCartQuantity = async (req, res) => {
     }
 };
 
+const getOrders = async (req, res) => {
+    const { _id, role } = req.user;
+
+    try {
+        if (role !== 'Customer') {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // 1. Get all orders for the customer
+        const [orders] = await pool.query(
+            'SELECT * FROM orders WHERE CustomerID = ? ORDER BY OrderDate DESC',
+            [_id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        const orderIds = orders.map(order => order.OrderID);
+
+        // 2. Get order details
+        const [orderDetails] = await pool.query(
+            `SELECT * FROM orderdetails WHERE OrderID IN (${orderIds.map(() => '?').join(',')})`,
+            orderIds
+        );
+
+        // 3. Get seller inventory data
+        const sellerInventoryIds = orderDetails.map(od => od.SellerInventoryID);
+        const [sellerInventories] = await pool.query(
+            `SELECT SellerInventoryID, ProductID FROM sellerinventory WHERE SellerInventoryID IN (${sellerInventoryIds.map(() => '?').join(',')})`,
+            sellerInventoryIds
+        );
+
+        const sellerInventoryMap = {};
+        sellerInventories.forEach(item => {
+            sellerInventoryMap[item.SellerInventoryID] = item.ProductID;
+        });
+
+        // 4. Get product details from inventory
+        const productIds = [...new Set(Object.values(sellerInventoryMap))];
+        const [products] = await pool.query(
+            `SELECT ProductID, Name, Brand, images FROM inventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            productIds
+        );
+
+        const productMap = {};
+        products.forEach(product => {
+            productMap[product.ProductID] = product;
+        });
+
+        // 5. Organize order details under their orders, with product info merged
+        const orderDetailsMap = {};
+        orderDetails.forEach(detail => {
+            const productID = sellerInventoryMap[detail.SellerInventoryID];
+            const productInfo = productMap[productID] || {};
+
+            const combinedProduct = {
+                OrderDetailID: detail.OrderDetailID,
+                Price: detail.Price,
+                Quantity: detail.Quantity,
+                SellerInventoryID: detail.SellerInventoryID,
+                ProductID: productID,
+                Name: productInfo.Name || null,
+                Brand: productInfo.Brand || null,
+                images: productInfo.images || []
+            };
+
+            if (!orderDetailsMap[detail.OrderID]) {
+                orderDetailsMap[detail.OrderID] = [];
+            }
+            orderDetailsMap[detail.OrderID].push(combinedProduct);
+        });
+
+        // 6. Build final structured order list
+        const structuredOrders = orders.map(order => ({
+            ...order,
+            Products: orderDetailsMap[order.OrderID] || []
+        }));
+
+        return res.status(200).json(structuredOrders);
+
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+const cancelOrder = async (req, res) => {
+    const { _id } = req.user;
+    const orderId = req.params.orderId;
+  
+    try {
+      const [userRows] = await pool.query(
+        'SELECT CustomerID FROM orders WHERE OrderID = ?',
+        [orderId]
+      );
+  
+      if (!userRows.length) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+  
+      if (userRows[0].CustomerID !== _id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+  
+      await pool.query(
+        "UPDATE orders SET OrderStatus = 'Cancelled' WHERE OrderID = ?",
+        [orderId]
+      );
+  
+      res.status(200).json({ message: "Order cancelled" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Error occurred while cancelling the order" });
+    }
+  };
+  
+
 
 module.exports = {
     CustomerRegister,
@@ -440,4 +570,6 @@ module.exports = {
     getCart,
     getWishlist,
     handleCartQuantity,
+    getOrders,
+    cancelOrder,
 }
