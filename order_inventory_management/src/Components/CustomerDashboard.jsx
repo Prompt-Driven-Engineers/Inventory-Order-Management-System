@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { formatOrderDate, getFirstImage } from "../functions/func";
 import { toast } from "react-toastify";
+import { handleLogout } from "../apiCall/customer";
 
 export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }) {
     const navigate = useNavigate();
@@ -42,17 +43,6 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
 
     const deliveredOrders = orderedProducts.filter(order => order.OrderStatus === "Delivered");
     const pendingOrders = orderedProducts.filter(order => order.OrderStatus !== "Delivered");
-
-    const handleLogout = async () => {
-        try {
-            await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
-            setIsLoggedIn(false); // clear your app state
-            setUser(null);
-            navigate('/');   // optional redirect
-        } catch (err) {
-            console.error('Logout failed:', err);
-        }
-    }
 
     const handleCancelOrder = (orderId) => {
         if (!orderId) return;
@@ -148,7 +138,9 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                 {/* Logout Button */}
                 {isLoggedIn && (
                     <div
-                        onClick={handleLogout}
+                        onClick={() => {
+                            handleLogout(setIsLoggedIn, setUser, navigate);
+                        }}
                         className="mt-6 flex items-center bg-red-100 text-red-600 px-3 py-2 font-semibold rounded-md cursor-pointer hover:bg-red-200 transition-all duration-300"
                     >
                         <LogOut className="h-5 w-5 mr-2" />

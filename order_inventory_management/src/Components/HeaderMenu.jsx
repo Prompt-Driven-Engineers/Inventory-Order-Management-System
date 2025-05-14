@@ -36,7 +36,7 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
 
                 {/* User and Logout Section */}
                 <div className="flex items-center space-x-2">
-                    {!isVendorLoggedIn && (
+                    {user?.role !== 'Seller' && (
                         <div className="flex items-center  px-3 py-2 font-bold rounded-md cursor-pointer hover:bg-blue-300 transition-all duration-300">
                             <button onClick={() => handleNavigate('/sellerReg')}>
                                 {/* <UserIcon className="h-5 w-5 mr-2" /> */}
@@ -47,7 +47,10 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
                     {isLoggedIn ? (
                         <div 
                             className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-2xl cursor-pointer hover:bg-blue-600 transition-all duration-300"
-                            onClick={() => handleNavigate('/customerDash')}
+                            onClick={() => {
+                                if(user.role === 'Customer') handleNavigate('/customerDash');
+                                else if(user.role === 'Seller') handleNavigate('/sellerDash');
+                            }}
                         >
                             <span className="text-sm font-medium">
                                 {(user?.email?.slice(0, 1) || '').toUpperCase()}
@@ -86,15 +89,15 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
                         </>
                     )}
 
-                    {isVendorLoggedIn && (
+                    {user?.role === 'Seller' && (
                         <>
-                            {shouldShowProducts && <button
-                                onClick={() => handleNavigate('/vendorDash')}
+                            <button
+                                onClick={() => handleNavigate('/sellerDash')}
                                 className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
                             >
                                 <ArchiveBoxIcon className="h-5 w-5 mr-1" />
                                 Your Products
-                            </button>}
+                            </button>
                             <button
                                 // onClick={() => { navigate('/wishlist'); }} 
                                 className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"

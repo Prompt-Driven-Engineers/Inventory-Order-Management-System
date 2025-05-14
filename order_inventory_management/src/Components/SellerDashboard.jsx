@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import { ShoppingBag, PlusCircle } from "lucide-react";
+import { ShoppingBag, PlusCircle, LogOut } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { handleLogout } from "../apiCall/customer";
 
-export default function SellerDashboard() {
+export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
     const navigate = useNavigate();
     const [seller, setSeller] = useState(null);
     const [stock, setStock] = useState([]);
@@ -15,30 +16,45 @@ export default function SellerDashboard() {
             withCredentials: true
         })
             .then((res) => {
-                setSeller(res.data); // ✅ Store only the response data
-                console.log(res.data); // ✅ Log actual data
+                setSeller(res.data);
+                console.log(res.data); 
             })
             .catch((err) => {
                 console.error("Error fetching seller:", err);
-                setSeller(null); // Ensure state is handled on error
+                setSeller(null); 
             });
     }, []);
+
 
     return (
         <div className="flex min-h-screen">
             {/* Left Sidebar */}
-            <div className="w-1/5 bg-gray-200 p-6 flex flex-col items-start">
-                {seller ? (
-                    <>
-                        <p className="text-gray-700 font-semibold text-2xl">{seller.storename}</p>
-                        <p className="text-gray-600">{seller.email}</p>
-                        <p className="text-gray-600">{seller.phone}</p>
-                        <p className="text-gray-600 mt-10 font-semibold text-lg">Accout Details</p>
-                        <p className="text-gray-600  ">Account no: <span className="text-black font-semibold">{seller.accountno}</span></p>
-                        <p className="text-gray-600 ">IFSC code: <span className="text-black font-semibold">{seller.ifsc}</span></p>
-                    </>
+            <div className="lg:w-1/4 w-full bg-white p-6 shadow-md flex flex-col justify-between">
+            {seller ? (
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold text-gray-700">Seller Info</h2>
+                    <p className="text-gray-600"><strong>Name:</strong> {seller.name}</p>
+                    <p className="text-gray-600"><strong>Email:</strong> {seller.email}</p>
+                    <p className="text-gray-600"><strong>Phone:</strong> {seller.phone}</p>
+                    <p className="text-gray-600 mt-10 font-semibold text-lg">Accout Details</p>
+                    <p className="text-gray-600  ">Account no: <span className="text-black font-semibold">{seller.accountno}</span></p>
+                    <p className="text-gray-600 ">IFSC code: <span className="text-black font-semibold">{seller.ifsc}</span></p>
+                </div>
                 ) : (
                     <p>Loading seller details...</p> // ✅ Prevents error when seller is null
+                )}
+
+                {/* Logout Button */}
+                {isLoggedIn && (
+                    <div
+                        onClick={() => {
+                            handleLogout(setIsLoggedIn, setUser, navigate);
+                        }}
+                        className="mt-6 flex items-center bg-red-100 text-red-600 px-3 py-2 font-semibold rounded-md cursor-pointer hover:bg-red-200 transition-all duration-300"
+                    >
+                        <LogOut className="h-5 w-5 mr-2" />
+                        Logout
+                    </div>
                 )}
             </div>
 

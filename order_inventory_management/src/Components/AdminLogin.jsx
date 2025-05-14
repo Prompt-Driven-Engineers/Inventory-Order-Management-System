@@ -5,22 +5,22 @@ export default function AdminLogin() {
 
     const navigate = useNavigate();
     const [errors, setErrors] = useState({});
-    const [form, setForm] = useState({
+    const [adminLoginForm, setAdminLoginForm] = useState({
         AdminId: '',
         Password: ''
     });
 
-    const validateForm = () => {
+    const validateAdminForm = () => {
         console.log('Inside validation');
         let newErrors = {};
     
-        if (!/^[ADM]{3}[0-9]{2}[A-Z]{2}[0-9]{2}[A-Z]{2}$/.test(form.AdminId)) newErrors.AdminId = "Enter Valid AdminId";
-        if (!form.AdminId.trim()) newErrors.AdminId = "AdminId is required";
+        if (!/^[ADM]{3}[0-9]{2}[A-Z]{2}[0-9]{2}[A-Z]{2}$/.test(adminLoginForm.AdminId)) newErrors.AdminId = "Enter Valid AdminId";
+        if (!adminLoginForm.AdminId.trim()) newErrors.AdminId = "AdminId is required";
       
     
         // Password validation
-        if (form.Password.length < 6) newErrors.Password = "Password must be at least 6 characters";
-        if (!form.Password.trim()) newErrors.Password = "Password is required";
+        if (adminLoginForm.Password.length < 6) newErrors.Password = "Password must be at least 6 characters";
+        if (!adminLoginForm.Password.trim()) newErrors.Password = "Password is required";
     
         setErrors(newErrors);
         console.log(errors);
@@ -29,23 +29,23 @@ export default function AdminLogin() {
     };
 
 
-    const handleChange = (e) => {
-        setForm({
-            ...form,
+    const handleAdminFormChange = (e) => {
+        setAdminLoginForm({
+            ...adminLoginForm,
             [e.target.name] : e.target.value
         });
     }
 
-    const handleLogin = async(e) => {
+    const handleAdminLogin = async(e) => {
         e.preventDefault();
-        console.log(form);
-        if (!validateForm()) return; // Stop if validation fails
+        console.log(adminLoginForm);
+        if (!validateAdminForm()) return; // Stop if validation fails
         console.log("logging in Admin");
 
         try{
             const response = await fetch('http://localhost:8000/admins/adminLogin', {
                 method: 'POST',
-                body: JSON.stringify(form),
+                body: JSON.stringify(adminLoginForm),
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -84,7 +84,7 @@ export default function AdminLogin() {
                     <form className="space-y-6">
                         <input 
                             type="text" 
-                            onChange={handleChange}
+                            onChange={handleAdminFormChange}
                             name="AdminId"
                             placeholder="Enter your AdminID"
                             className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500"
@@ -93,7 +93,7 @@ export default function AdminLogin() {
                         <input 
                         type="Password" 
                         name="Password"
-                        onChange={handleChange}
+                        onChange={handleAdminFormChange}
                         placeholder="Enter your Password"
                         className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-blue-500"
                     
@@ -101,7 +101,7 @@ export default function AdminLogin() {
 
                         <button
                             type="button"
-                            onClick={handleLogin}
+                            onClick={handleAdminLogin}
                             className="bg-black text-white w-full rounded-lg py-2 px-4 hover:bg-amber-300 hover:text-black hover:border-black border-1"
                             >
                                 Login

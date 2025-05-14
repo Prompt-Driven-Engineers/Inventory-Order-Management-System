@@ -52,7 +52,7 @@ function App() {
   }, [isLoggedIn]);
 
   return (
-    <Router> {/* Wrap everything inside BrowserRouter */}
+    <Router>
     <ToastContainer 
         limit={3}
         autoClose={3000}
@@ -73,12 +73,12 @@ function App() {
           : <Route path='/customerLog' element={<CustomerLogin />} />
           }
           <Route path='/adminLog' element={<AdminLogin />} />
-          <Route path='/sellerDash' element={<SellerDashboard />} />
+          <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
           <Route path='/pendingSellers' element={<PendingSellersList />} />
 
           <Route path='/adminLog' element={<AdminLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          <Route path='/adminDash' element={<AdminDashboard />} />
+          <Route path='/adminDash' element={<AdminDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
           <Route path='/whmlog' element={<WHMlogin />} />

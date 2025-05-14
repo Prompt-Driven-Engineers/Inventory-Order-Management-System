@@ -72,6 +72,15 @@ const CustomerLogin = async (req, res) => {
 
         const UserID = userRows[0].UserID;
 
+        const [customerRows] = await connection.query(
+            `SELECT CustomerID FROM customers WHERE CustomerID = ?`,
+            [UserID]
+        )
+
+        if (customerRows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         // **Step 2: Retrieve hashed password from passwords table**
         const [passwordRows] = await connection.query(
             `SELECT PasswordHash FROM userpasswords WHERE UserID = ?`,
