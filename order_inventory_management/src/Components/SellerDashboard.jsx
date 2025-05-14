@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import { ShoppingBag, PlusCircle, LogOut } from "lucide-react";
+import { ShoppingBag, PlusCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { handleLogout } from "../apiCall/customer";
+import LeftSidebar from "./LeftSidebar";
 
 export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
     const navigate = useNavigate();
@@ -11,7 +12,6 @@ export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
     const [soldProducts, setSoldProducts] = useState([]);
 
     useEffect(() => {
-        // console.log(UserID);
         axios.get(`http://localhost:8000/sellers/sellerDetails`, {
             withCredentials: true
         })
@@ -28,9 +28,9 @@ export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
 
     return (
         <div className="flex min-h-screen">
-            {/* Left Sidebar */}
-            <div className="lg:w-1/4 w-full bg-white p-6 shadow-md flex flex-col justify-between">
-            {seller ? (
+            {/* Left Side bar */}
+            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
+                {seller ? (
                 <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-gray-700">Seller Info</h2>
                     <p className="text-gray-600"><strong>Name:</strong> {seller.name}</p>
@@ -43,20 +43,7 @@ export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
                 ) : (
                     <p>Loading seller details...</p> // ✅ Prevents error when seller is null
                 )}
-
-                {/* Logout Button */}
-                {isLoggedIn && (
-                    <div
-                        onClick={() => {
-                            handleLogout(setIsLoggedIn, setUser, navigate);
-                        }}
-                        className="mt-6 flex items-center bg-red-100 text-red-600 px-3 py-2 font-semibold rounded-md cursor-pointer hover:bg-red-200 transition-all duration-300"
-                    >
-                        <LogOut className="h-5 w-5 mr-2" />
-                        Logout
-                    </div>
-                )}
-            </div>
+            </LeftSidebar>
 
             {/* Right Content Area */}
             <div className="flex-1 p-6 bg-gray-100">

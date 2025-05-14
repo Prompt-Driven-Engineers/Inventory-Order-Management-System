@@ -1,26 +1,16 @@
-import { useState, useEffect, useContext } from "react";
-import { ShoppingBag, PlusCircle, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PlusCircle, LogOut } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { handleLogout } from "../apiCall/customer";
+import { fetchAdminDetails } from "../apiCall/admin";
 
 export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
     const navigate = useNavigate();
     const [admin, setAdmin] = useState(null);
 
     useEffect(() => {
-        // console.log(UserID);
-        axios.get(`http://localhost:8000/admins/adminDetails`, {
-            withCredentials: true
-        })
-            .then((res) => {
-                setAdmin(res.data); // Store only the response data
-                console.log(res.data); // Log actual data
-            })
-            .catch((err) => {
-                console.error("Error fetching admin:", err);
-                setAdmin(null); // Ensure state is handled on error
-            });
+        fetchAdminDetails(setAdmin);
     }, []);
 
     return (

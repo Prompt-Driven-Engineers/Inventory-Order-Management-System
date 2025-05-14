@@ -50,6 +50,7 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
                             onClick={() => {
                                 if(user.role === 'Customer') handleNavigate('/customerDash');
                                 else if(user.role === 'Seller') handleNavigate('/sellerDash');
+                                else if(user.role === 'Admin') handleNavigate('/adminDash');
                             }}
                         >
                             <span className="text-sm font-medium">
