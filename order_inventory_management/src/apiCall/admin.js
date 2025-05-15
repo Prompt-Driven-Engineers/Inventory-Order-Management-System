@@ -6,7 +6,6 @@ export const fetchAdminDetails = async(setAdmin) => {
     })
     .then((res) => {
         setAdmin(res.data); // Store only the response data
-        console.log(res.data); // Log actual data
     })
     .catch((err) => {
         console.error("Error fetching admin:", err);

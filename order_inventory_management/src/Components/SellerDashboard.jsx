@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from "react";
 import { ShoppingBag, PlusCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-import { handleLogout } from "../apiCall/customer";
 import LeftSidebar from "./LeftSidebar";
 
 export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {

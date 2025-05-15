@@ -130,6 +130,23 @@ const SellerDetails = async (req, res) => {
         const sellerQuery = `SELECT storename, accountno, ifsc FROM sellers WHERE SellerID = ?`;
         const [sellerResults] = await pool.execute(sellerQuery, [_id]);
 
+        // Fetch address
+        const [addressRows] = await pool.query(`SELECT * FROM address WHERE UserID = ?`,
+            [_id]
+        );
+
+        // Format address list
+        const addresses = addressRows.map(addr => ({
+            AddressID: addr.AddressID,
+            Landmark: addr.Landmark,
+            Street: addr.Street,
+            City: addr.City,
+            State: addr.State,
+            Country: addr.Country,
+            Zip: addr.Zip,
+            AddressType: addr.AddressType
+        }));
+
         // Merge results
         const sellerData = {
             name: userResults[0].Name,  
@@ -137,7 +154,8 @@ const SellerDetails = async (req, res) => {
             phone: userResults[0].Phone,
             storename: sellerResults.length > 0 ? sellerResults[0].storename : null,
             accountno: sellerResults.length > 0 ? sellerResults[0].accountno : null,
-            ifsc: sellerResults.length > 0 ? sellerResults[0].ifsc : null
+            ifsc: sellerResults.length > 0 ? sellerResults[0].ifsc : null,
+            addresses
         };
         
         res.status(200).json(sellerData);
@@ -202,8 +220,8 @@ const AddProduct = async (req, res) => {
 };
 
 const SellerList = async (req, res) => {
-    const { _id, email } = req.user;
-    
+    const { _id } = req.user;
+
     try {
         // Get role of the logged-in user
         const [adminRows] = await pool.query(
@@ -211,23 +229,23 @@ const SellerList = async (req, res) => {
             [_id]
         );
 
-        if (adminRows.length === 0 || 
-            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
+        if (
+            adminRows.length === 0 ||
+            (adminRows[0].Role !== "SuperAdmin" &&
+                adminRows[0].Role !== "Seller Administrator")
+        ) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
         // Get list of all sellers
-        const [sellers] = await pool.query(
-            'SELECT * FROM sellers'
-        );
+        const [sellers] = await pool.query('SELECT * FROM sellers');
 
-        // Extract UserIDs from the sellers table
         const userIds = sellers.map(seller => seller.SellerID);
         if (userIds.length === 0) {
             return res.status(200).json({ sellers: [] });
         }
 
-        // Fetch user details for those UserIDs
+        // Fetch user details
         const [userDetails] = await pool.query(
             `SELECT UserID, Name, Email, Phone, CreatedAt, LastLogin 
              FROM users 
@@ -235,10 +253,38 @@ const SellerList = async (req, res) => {
             [userIds]
         );
 
-        // Merge admin and user details
+        // Fetch addresses for all sellers
+        const [addressRows] = await pool.query(
+            `SELECT * FROM address WHERE UserID IN (?)`,
+            [userIds]
+        );
+
+        // Group addresses by UserID
+        const addressMap = {};
+        for (const addr of addressRows) {
+            if (!addressMap[addr.UserID]) addressMap[addr.UserID] = [];
+            addressMap[addr.UserID].push({
+                AddressID: addr.AddressID,
+                Landmark: addr.Landmark,
+                Street: addr.Street,
+                City: addr.City,
+                State: addr.State,
+                Country: addr.Country,
+                Zip: addr.Zip,
+                AddressType: addr.AddressType
+            });
+        }
+
+        // Merge all details
         const sellerList = sellers.map(seller => {
-            const user = userDetails.find(user => user.UserID === seller.SellerID);
-            return { ...seller, ...user };
+            const user = userDetails.find(u => u.UserID === seller.SellerID) || {};
+            const addresses = addressMap[seller.SellerID] || [];
+
+            return {
+                ...seller,
+                ...user,
+                Addresses: addresses
+            };
         });
 
         res.status(200).json({ sellers: sellerList });

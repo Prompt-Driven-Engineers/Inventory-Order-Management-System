@@ -21,7 +21,7 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
 
     return (
         <>
-            <div className="box-border flex justify-around border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
+            <div className="fixed w-screen z-50 box-border flex justify-around border border-gray-200 bg-gray-50 p-3 h-16 shadow-md">
 
                 {/* Logo Section */}
                 <div className="flex items-center">

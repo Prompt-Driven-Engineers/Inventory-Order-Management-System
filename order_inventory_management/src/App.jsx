@@ -53,12 +53,13 @@ function App() {
 
   return (
     <Router>
-    <ToastContainer 
+      <ToastContainer
         limit={3}
         autoClose={3000}
       />
-      <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn}/>
-      <Routes>
+      <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} />
+      <div className='pt-[64px]'>
+        <Routes>
           <Route path='/advanceHome' element={<HomePage />} />
           <Route path='/' element={<UserHomePage />} />
           {/* register paths */}
@@ -70,7 +71,7 @@ function App() {
           <Route path='/userLogin' element={<UserLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/sellerLog' element={<SellerLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           {isLoggedIn ? <Route path='/customerLog' element={<HomePage />} />
-          : <Route path='/customerLog' element={<CustomerLogin />} />
+            : <Route path='/customerLog' element={<CustomerLogin />} />
           }
           <Route path='/adminLog' element={<AdminLogin />} />
           <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
@@ -99,7 +100,8 @@ function App() {
           <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />} />
           <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
           <Route path="/orderProduct" element={<OrderPage isLoggedIn={isLoggedIn} user={user} />} />
-      </Routes>
+        </Routes>
+      </div>
     </Router>
   );
 }
