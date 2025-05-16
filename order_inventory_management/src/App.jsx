@@ -30,6 +30,7 @@ import Cart from './Components/Cart';
 import Wishlist from './Components/Wishlist';
 import ProductPage from './Components/ProductPage';
 import OrderPage from './Components/OrderPage';
+import CustomerList from './pages/CustomerList';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,6 +78,8 @@ function App() {
           <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
           <Route path='/pendingSellers' element={<PendingSellersList />} />
+          
+          <Route path='/allCustomers' element={<CustomerList />} />
 
           <Route path='/adminLog' element={<AdminLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/adminDash' element={<AdminDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />

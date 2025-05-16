@@ -563,9 +563,87 @@ const cancelOrder = async (req, res) => {
       console.error(err);
       res.status(500).json({ error: "Error occurred while cancelling the order" });
     }
-  };
+};
   
+const getAllCustomers = async (req, res) => {
+  const { _id } = req.user;
 
+  try {
+    // Step 1: Verify admin role
+    const [adminRows] = await pool.query(
+      'SELECT Role FROM admins WHERE UserID = ?',
+      [_id]
+    );
+
+    const adminRole = adminRows?.[0]?.Role;
+    if (!adminRole || (adminRole !== "SuperAdmin" && adminRole !== "Customer Support")) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Step 2: Get all customers
+    const [customerRows] = await pool.query('SELECT * FROM Customers');
+    const userIds = customerRows.map(user => user.CustomerID);
+
+    if (!userIds.length) {
+      return res.status(200).json([]); // No customers
+    }
+
+    // Step 3: Get user details
+    const [userRows] = await pool.query(
+      `SELECT * FROM users WHERE UserID IN (${userIds.map(() => '?').join(',')})`,
+      userIds
+    );
+
+    // Step 4: Get all addresses for these users
+    const [addressRows] = await pool.query(
+      `SELECT * FROM address WHERE UserID IN (${userIds.map(() => '?').join(',')})`,
+      userIds
+    );
+
+    // Step 5: Merge everything
+    const customerData = customerRows.map(customer => {
+      const userInfo = userRows.find(user => user.UserID === customer.CustomerID);
+      const addresses = addressRows.filter(addr => addr.UserID === customer.CustomerID);
+
+      return {
+        ...customer,
+        user: userInfo || null,
+        addresses: addresses || [],
+      };
+    });
+
+    return res.status(200).json(customerData);
+
+  } catch (err) {
+    console.error("Error fetching customers:", err);
+    return res.status(500).json({ error: "Error occurred while fetching customers" });
+  }
+};
+
+const updateCustomerStatus = (req, res) => {
+  const customerId = req.params.id;
+  const { status } = req.body;
+  // Validate input
+  const validStatuses = ['Active', 'Deactive', 'Ban'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  const sql = 'UPDATE customers SET Status = ? WHERE CustomerID = ?';
+
+  pool.query(sql, [status, customerId], (err, result) => {
+    if (err) {
+      console.error('Error updating status:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    res.json({ message: 'Status updated successfully' });
+  });
+};
 
 module.exports = {
     CustomerRegister,
@@ -581,4 +659,6 @@ module.exports = {
     handleCartQuantity,
     getOrders,
     cancelOrder,
+    getAllCustomers,
+    updateCustomerStatus,
 }

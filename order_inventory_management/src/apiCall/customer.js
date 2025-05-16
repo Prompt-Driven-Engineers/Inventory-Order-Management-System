@@ -23,3 +23,16 @@ export const handleLogout = async (setIsLoggedIn, setUser, navigate) => {
     console.error('Logout failed:', err);
   }
 }
+
+export const fetchAllCustomer = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/customers/customerList', {
+      withCredentials: true,
+    });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customers:", error);
+    return null;
+  }
+};

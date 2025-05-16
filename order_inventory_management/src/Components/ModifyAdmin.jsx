@@ -43,15 +43,15 @@ export default function ModifyAdmin() {
             { AdminID, newAccountStatus },  // Send AdminID & new status
             { withCredentials: true }  // placement of withCredentials
         )
-            .then((res) => {
-                if (res.status === 200) {
-                    console.log("Status Change Successful");
-                    setRefresh((prev) => !prev); // Toggle `refresh` to trigger useEffect
-                }
-            })
-            .catch((err) => {
-                console.error("Error updating status:", err);
-            });
+        .then((res) => {
+            if (res.status === 200) {
+                console.log("Status Change Successful");
+                setRefresh((prev) => !prev); // Toggle `refresh` to trigger useEffect
+            }
+        })
+        .catch((err) => {
+            console.error("Error updating status:", err);
+        });
     };
 
     return (

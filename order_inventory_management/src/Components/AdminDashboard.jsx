@@ -91,13 +91,13 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                                    onClick={() => { }}
+                                    onClick={() => navigate('/allCustomers')}
                                 >
                                     View User List
                                 </button>
                                 <button
                                     className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                                    onClick={() => { }}
+                                    onClick={() => navigate('/allCustomers')}
                                 >
                                     Modify User
                                 </button>

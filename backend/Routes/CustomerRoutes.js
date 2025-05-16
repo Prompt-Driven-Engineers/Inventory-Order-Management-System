@@ -14,6 +14,8 @@ const {
         handleCartQuantity,
         getOrders,
         cancelOrder,
+        getAllCustomers,
+        updateCustomerStatus,
     } = require('../Controllers/CustomerController');
 const { verifyToken } = require('../Authntication/UserAuthn');
 
@@ -30,5 +32,7 @@ router.get('/getWishlist', verifyToken, getWishlist);
 router.put('/changeCartQuantity', verifyToken, handleCartQuantity);
 router.get('/getOrderedProducts', verifyToken, getOrders);
 router.put('/getOrderedProducts/:orderId', verifyToken, cancelOrder);
+router.get('/customerList', verifyToken, getAllCustomers);
+router.put('/:id/status', updateCustomerStatus);
 
 module.exports = router;
