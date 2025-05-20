@@ -3,6 +3,7 @@ import axios from "axios";
 import Autosuggest from "react-autosuggest";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from "react-router-dom";
 
 const ProductSearch = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -13,6 +14,7 @@ const ProductSearch = () => {
         discount: '',
         quantity: '',
     });
+    const navigate = useNavigate();
 
     // Function to fetch product suggestions
     const onSuggestionsFetchRequested = ({ value }) => {
@@ -52,10 +54,15 @@ const ProductSearch = () => {
             withCredentials: true // ✅ move it here!
         })
         .then(response => {
-            toast.success("Product added successfully");
             console.log("Product added successfully:", response);
+            navigate('/sellerDash', {replace: true});
+            toast.success("Product added successfully");
         })
-        .catch(err => console.error("Error adding product:", err));
+        .catch((err) => {
+            console.error("Error adding product:", err);
+            const errorMessage = err?.response?.data?.message || err?.response?.data?.error || "Failed to add product";
+            toast.error(errorMessage);
+        });
     };
 
     const inputProps = {

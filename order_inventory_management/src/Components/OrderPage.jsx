@@ -2,6 +2,7 @@ import { React, useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
 import { toast } from 'react-toastify';
+import { getFirstImage } from '../functions/func';
 
 export default function OrderPage({ isLoggedIn, user }) {
   const [orderedProducts, setOrderedProducts] = useState([]);
@@ -31,6 +32,7 @@ export default function OrderPage({ isLoggedIn, user }) {
             Price: Math.round(p.Price - p.Price * (p.Discount / 100))
           }));
           setOproducts(productsWithQuantity);
+          console.log(result.products);
         } else {
           console.warn('⚠️ Error fetching products:', result.message);
         }
@@ -126,9 +128,9 @@ export default function OrderPage({ isLoggedIn, user }) {
               >
                 {/* Product Image */}
                 <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
-                  {product.ImageURL ? (
+                  {product.images ? (
                     <img
-                      // src={`http://localhost:3000/${product.ImageURL}`}
+                      src={getFirstImage(product.images)}
                       alt={product.ProductName}
                       className="w-full h-full object-contain rounded-lg"
                     />

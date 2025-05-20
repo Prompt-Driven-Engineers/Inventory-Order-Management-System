@@ -12,15 +12,25 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
         fetchAdminDetails(setAdmin);
     }, []);
 
+    const statusColor = {
+        Active: 'text-green-600',
+        Inactive: 'text-yellow-500',
+        Suspended: 'text-red-600'
+    };
+
     return (
         <div className="flex min-h-screen">
             {/* Left Sidebar */}
             <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
                 {admin ? (
                     <div className="space-y-4">
-                        <p className="text-gray-600">{admin.email}</p>
-                        <p className="text-gray-600">{admin.phone}</p>
-                        <p className="text-gray-600  ">Role: <span className="text-black font-semibold">{admin.Role}</span></p>
+                        <p className="text-gray-600"><strong>Name:</strong> {admin.name}</p>
+                    <p className="text-gray-600"><strong>Email:</strong> {admin.email}</p>
+                    <p className="text-gray-600"><strong>Phone:</strong> {admin.phone}</p>
+                    <p className="text-gray-600"><strong>Role:</strong> {admin.Role}</p>
+                    Account Status: <span className={`text-md font-medium ${statusColor[admin.AccountStatus] || 'text-gray-500'}`}>
+                        {admin.AccountStatus}
+                    </span>
                     </div>
                 ) : (
                     <p>Loading admin details...</p> // Prevents error when admin is null
@@ -109,22 +119,16 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
                     {(admin?.Role === "SuperAdmin" || admin?.Role === "Inventory Administrator") && (
                         <section className="bg-white p-6 rounded-xl shadow">
                             <h2 className="text-2xl font-semibold mb-4 text-yellow-700">Product Management</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <button
                                     className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
                                     onClick={() => navigate('/allProduct')}
                                 >
-                                    View All Products
+                                    Manage Products
                                 </button>
                                 <button
                                     className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
-                                    onClick={() => { }}
-                                >
-                                    Remove Product
-                                </button>
-                                <button
-                                    className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
-                                    onClick={() => { }}
+                                    onClick={() => { navigate('/sellerInventory')}}
                                 >
                                     Seller Inventory
                                 </button>
@@ -145,7 +149,7 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <button
                                     className="flex items-center justify-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition"
-                                    onClick={() => { }}
+                                    onClick={() => { navigate('/ordersPage')}}
                                 >
                                     View All Orders
                                 </button>

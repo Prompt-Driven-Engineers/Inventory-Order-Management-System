@@ -175,7 +175,7 @@ const AdminDetails = async (req, res) => {
         }
 
         // Fetch store details
-        const adminQuery = `SELECT Role FROM admins WHERE UserID = ?`;
+        const adminQuery = `SELECT Role, AccountStatus FROM admins WHERE UserID = ?`;
         const [adminResults] = await pool.execute(adminQuery, [_id]);
 
         // Merge results
@@ -183,7 +183,8 @@ const AdminDetails = async (req, res) => {
             name: userResults[0].Name,  
             email: userResults[0].Email,
             phone: userResults[0].Phone,
-            Role: adminResults[0].Role
+            Role: adminResults[0].Role,
+            AccountStatus: adminResults[0].AccountStatus,
         };
         
         res.status(200).json(adminData);
@@ -351,6 +352,181 @@ const ModifyStatus = async (req, res) => {
     }
 };
 
+const fetchSellerInventory = async (req, res) => {
+    const { _id } = req.user;
+
+    try {
+        // Step 1: Check admin role
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (
+            !adminRows.length ||
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")
+        ) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Step 2: Get seller inventory
+        const [inventoryRows] = await pool.query('SELECT * FROM sellerInventory ORDER BY AddedAt DESC');
+        if (!inventoryRows.length) {
+            return res.json([]);
+        }
+
+        const productIds = inventoryRows.map(item => item.ProductID);
+        const sellerIds = [...new Set(inventoryRows.map(item => item.SellerID))]; // Unique SellerIDs
+
+        // Step 3: Get product details
+        const [productDetails] = await pool.query(
+            `SELECT * FROM inventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            productIds
+        );
+
+        // Step 4: Get seller info (StoreName)
+        const [sellerDetails] = await pool.query(
+            `SELECT SellerID, StoreName FROM sellers WHERE SellerID IN (${sellerIds.map(() => '?').join(',')})`,
+            sellerIds
+        );
+
+        // Step 5: Merge all data
+        const mergedData = inventoryRows.map(item => {
+            const product = productDetails.find(p => p.ProductID === item.ProductID);
+            const seller = sellerDetails.find(s => s.SellerID === item.SellerID);
+
+            return {
+                ...item,
+                ...(product ? {
+                    Name: product.Name,
+                    Description: product.Description,
+                    images: product.images
+                } : {}),
+                ...(seller ? { StoreName: seller.StoreName } : {})
+            };
+        });
+
+        return res.json(mergedData);
+    } catch (err) {
+        console.error("Error fetching seller inventory:", err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+const updateInventoryStatus = async (req, res) => {
+    const { _id } = req.user;
+    const { inventoryId } = req.params;
+    const { status } = req.body;
+
+    try {
+        // Step 1: Check admin role
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (
+            !adminRows.length ||
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")
+        ) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Step 2: Validate status
+        const validStatuses = ["Pending", "Approved", "Rejected"];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid status" });
+        }
+
+        // Step 3: Update inventory status and admin ID
+        const [result] = await pool.query(
+            'UPDATE sellerInventory SET Status = ?, AddedBy = ? WHERE SellerInventoryID = ?',
+            [status, _id, inventoryId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Inventory not found" });
+        }
+
+        return res.json({ message: "Inventory status updated successfully" });
+
+    } catch (err) {
+        console.error("Error updating inventory status:", err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+const fetchAllOrdersWithDetails = async (req, res) => {
+    const { _id } = req.user;
+
+    try {
+        // Step 1: Check admin role
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (
+            !adminRows.length ||
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")
+        ) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Step 2: Get all orders sorted by OrderDate (latest first)
+        const [orders] = await pool.query(`
+            SELECT * FROM orders ORDER BY OrderDate DESC
+        `);
+
+        if (!orders.length) return res.json([]);
+
+        // Step 3: Get all order details for these orders
+        const orderIds = orders.map(order => order.OrderID);
+        const [orderDetails] = await pool.query(
+            `SELECT * FROM orderdetails WHERE OrderID IN (${orderIds.map(() => '?').join(',')})`,
+            orderIds
+        );
+
+        // Step 4: Get product info from sellerInventory and inventory tables
+        const inventoryIds = [...new Set(orderDetails.map(item => item.SellerInventoryID))];
+        const [sellerInventories] = await pool.query(
+            `SELECT * FROM sellerInventory WHERE SellerInventoryID IN (${inventoryIds.map(() => '?').join(',')})`,
+            inventoryIds
+        );
+        const productIds = [...new Set(sellerInventories.map(inv => inv.ProductID))];
+        const [products] = await pool.query(
+            `SELECT ProductID, Name, Description, images FROM inventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            productIds
+        );
+
+        // Step 5: Merge all data
+        const detailedOrders = orders.map(order => {
+            const orderItems = orderDetails
+                .filter(od => od.OrderID === order.OrderID)
+                .map(od => {
+                    const sellerInventory = sellerInventories.find(inv => inv.SellerInventoryID === od.SellerInventoryID);
+                    const product = products.find(p => p.ProductID === sellerInventory?.ProductID);
+
+                    return {
+                        ...od,
+                        SellerInventory: sellerInventory || {},
+                        Product: product || {},
+                    };
+                });
+
+            return {
+                ...order,
+                items: orderItems
+            };
+        });
+
+        return res.json(detailedOrders);
+    } catch (err) {
+        console.error("Error fetching orders:", err);
+        return res.status(500).json({ message: "Server Error" });
+    }
+};
+
 module.exports = {
     AdminLogin,
     AdminDetails,
@@ -358,5 +534,8 @@ module.exports = {
     AdminList,
     AdminListMod,
     ModifyRole,
-    ModifyStatus
+    ModifyStatus,
+    fetchSellerInventory,
+    updateInventoryStatus,
+    fetchAllOrdersWithDetails,
 }

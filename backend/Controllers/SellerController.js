@@ -127,7 +127,7 @@ const SellerDetails = async (req, res) => {
         }
 
         // Fetch store details
-        const sellerQuery = `SELECT storename, accountno, ifsc FROM sellers WHERE SellerID = ?`;
+        const sellerQuery = `SELECT storename, accountno, ifsc, Status FROM sellers WHERE SellerID = ?`;
         const [sellerResults] = await pool.execute(sellerQuery, [_id]);
 
         // Fetch address
@@ -155,6 +155,7 @@ const SellerDetails = async (req, res) => {
             storename: sellerResults.length > 0 ? sellerResults[0].storename : null,
             accountno: sellerResults.length > 0 ? sellerResults[0].accountno : null,
             ifsc: sellerResults.length > 0 ? sellerResults[0].ifsc : null,
+            Status: sellerResults.length > 0 ? sellerResults[0].Status : null,
             addresses
         };
         
@@ -194,7 +195,7 @@ const AddProduct = async (req, res) => {
 
         // Insert into inventory
         const [inventoryRslt] = await connection.query(
-            `INSERT INTO inventory (Name, Description, Category, ProductType, Specifications, images)
+            `INSERT INTO inventory (Name, Description, Category, Subcategory, Specifications, images)
              VALUES (?, ?, ?, ?, ?, ?)`, 
             [Name, Description, Category, ProductType, specificationsJSON, JSON.stringify(imagePaths)]
         );
@@ -402,6 +403,106 @@ const AddExisProduct = async(req, res) => {
     }
 }
 
+const fetchSellerInventory = async (req, res) => {
+    const { _id } = req.user;
+
+    try {
+        // Step 1: Validate seller
+        const [sellerRows] = await pool.query(
+            'SELECT Status FROM sellers WHERE SellerID = ?',
+            [_id]
+        );
+
+        if (sellerRows.length === 0) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // Step 2: Get seller's inventory
+        const [inventoryRows] = await pool.query(
+            'SELECT * FROM sellerinventory WHERE SellerID = ? ORDER BY AddedAt DESC',
+            [_id]
+        );
+
+        if (inventoryRows.length === 0) {
+            return res.json([]);
+        }
+
+        const productIds = inventoryRows.map(item => item.ProductID);
+
+        // Step 3: Get related product details
+        const [productDetails] = await pool.query(
+            `SELECT * FROM inventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            productIds
+        );
+
+        // Step 4: Merge data
+        const mergedData = inventoryRows.map(item => {
+            const product = productDetails.find(p => p.ProductID === item.ProductID);
+
+            return {
+                ...item,
+                ...(product ? {
+                    Name: product.Name,
+                    Description: product.Description,
+                    Category: product.Category,
+                    Subcategory: product.Subcategory,
+                    images: product.images,
+                    Brand: product.Brand,
+                    ProductStatus: product.Status
+                } : {})
+            };
+        });
+
+        res.json(mergedData);
+    } catch (err) {
+        console.error("Error fetching seller inventory:", err);
+        res.status(500).json({ error: "Failed to fetch seller inventory" });
+    }
+};
+
+const deleteFromInventory = async (req, res) => {
+    const { _id } = req.user;
+    const sellerInventoryID = req.params.sellerInventoryId;
+
+    try {
+        // Step 1: Validate seller
+        const [sellerRows] = await pool.query(
+            'SELECT Status FROM sellers WHERE SellerID = ?',
+            [_id]
+        );
+
+        if (sellerRows.length === 0) {
+            return res.status(403).json({ message: "Unauthorized: Seller not found" });
+        }
+
+        if (sellerRows[0].Status !== "Active") {
+            return res.status(403).json({ message: `Access denied: Seller status is ${sellerRows[0].Status}` });
+        }
+
+        // Step 2: Verify ownership
+        const [inventoryRows] = await pool.query(
+            'SELECT * FROM sellerInventory WHERE SellerInventoryID = ? AND SellerID = ?',
+            [sellerInventoryID, _id]
+        );
+
+        if (inventoryRows.length === 0) {
+            return res.status(404).json({ message: "Inventory item not found or does not belong to you" });
+        }
+
+        // Step 3: Delete item
+        await pool.query(
+            'DELETE FROM sellerInventory WHERE SellerInventoryID = ?',
+            [sellerInventoryID]
+        );
+
+        return res.status(200).json({ message: "Removed from inventory successfully" });
+
+    } catch (err) {
+        console.error("Error removing from inventory:", err);
+        res.status(500).json({ error: "Failed to remove from inventory" });
+    }
+};
+
 module.exports = 
 {   SellerRegister, 
     SellerLogin,
@@ -411,4 +512,6 @@ module.exports =
     PendingSellers,
     ModifySellerStatus,
     AddExisProduct,
+    fetchSellerInventory,
+    deleteFromInventory,
 };

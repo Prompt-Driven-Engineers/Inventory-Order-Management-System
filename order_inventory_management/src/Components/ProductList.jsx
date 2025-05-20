@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFirstImage } from "../functions/func";
 
@@ -46,57 +46,14 @@ export default function ProductList() {
 
   const handleApplyFilter = async(e) => {
     e.preventDefault();
-  //   const filterForm = form;
-  //   await fetchByFilter();
-  //   navigate(`/products/filtered/${encodeURIComponent(JSON.stringify(filterForm))}`);    
-  // }
-
-  // const fetchByFilter = async() => {   
-  //   console.log(form);
-  //   const response = await fetch(`http://localhost:3000/products/getByFilter?filter=${encodeURIComponent(JSON.stringify(form))}`, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   });
-  //   const result = await response.json();
-  //   setFilteredProducts(result.length ? result : []);
     
   }
     
   return (
     <div className="flex w-full">
-      {/* Filters Section */}
-      <div className="w-1/5">
-        <div className="max-w-lg p-6 bg-white shadow-lg rounded-lg sticky top-12">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">Filters:</h3>
-          <form onSubmit={handleApplyFilter} className="space-y-4">
-            {dynamicAttributes.map((attribute, index) => (
-              <div key={index} className="flex flex-col space-y-2">
-                <label htmlFor={attribute.name} className="text-sm font-medium text-gray-700">
-                  {attribute.name}
-                </label>
-                <input
-                  type={attribute.type === 'number' ? 'number' : 'text'}
-                  name={attribute.name}
-                  placeholder={`Enter ${attribute.name}`}
-                  onChange={handleFilterChange}
-                  className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-                />
-              </div>
-            ))}
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200"
-            >
-              Apply Filters
-            </button>
-          </form>
-        </div>
-      </div>
 
       {/* Product List Section */}
-      <div className="px-4 w-3/4">
+      <div className="px-4 w-full">
         {/* Hero Banner */}
         <div className="bg-gradient-to-r from-teal-400 to-blue-500 p-5 rounded-lg mb-6 shadow-md text-white text-center">
           <h2 className="text-3xl font-semibold">Explore the Best Deals on Products!</h2>

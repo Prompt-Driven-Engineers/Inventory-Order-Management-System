@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import productCategories from '../Data/ProductTypeAttributes';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 function AddProduct() {
 
@@ -15,6 +17,7 @@ function AddProduct() {
         images: [], // Array to hold image files
         SellerId: ''
     });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setForm({
@@ -71,9 +74,10 @@ function AddProduct() {
         
         const result = await response.json();
         if(response.ok) {
-            alert('Product added sucessfully');
+            navigate('/sellerDash', {replace: true});
+            toast.success("Product added successfully");
         } else {
-            alert('Error occured while adding product');
+            toast.error('Error occured while adding product');
         }
         console.log(result);
     };

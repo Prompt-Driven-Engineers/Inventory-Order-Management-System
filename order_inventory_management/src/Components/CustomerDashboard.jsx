@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { formatOrderDate, getFirstImage } from "../functions/func";
 import { toast } from "react-toastify";
-import { handleLogout } from "../apiCall/customer";
+import LeftSidebar from "./LeftSidebar";
 
 export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }) {
     const navigate = useNavigate();
@@ -114,9 +114,9 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <div className="lg:w-1/4 w-full bg-white p-6 shadow-md flex flex-col justify-between">
+            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
+                {customer ? (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-700">Customer Info</h2>
                     <p className="text-gray-600"><strong>Name:</strong> {customer.name}</p>
                     <p className="text-gray-600"><strong>Email:</strong> {customer.email}</p>
                     <p className="text-gray-600"><strong>Phone:</strong> {customer.phone}</p>
@@ -134,23 +134,13 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                         </div>
                     )}
                 </div>
-
-                {/* Logout Button */}
-                {isLoggedIn && (
-                    <div
-                        onClick={() => {
-                            handleLogout(setIsLoggedIn, setUser, navigate);
-                        }}
-                        className="mt-6 flex items-center bg-red-100 text-red-600 px-3 py-2 font-semibold rounded-md cursor-pointer hover:bg-red-200 transition-all duration-300"
-                    >
-                        <LogOut className="h-5 w-5 mr-2" />
-                        Logout
-                    </div>
+                ) : (
+                    <p>Loading seller details...</p> // ✅ Prevents error when seller is null
                 )}
-            </div>
-
+            </LeftSidebar>
+            
             {/* Main Content */}
-            <div className="flex-1 p-6">
+            <div className="ml-0 sm:ml-[25%] flex-1 p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome, {customer.name}</h1>
 
                 {/* Quick Actions */}
@@ -211,12 +201,13 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                                                     <p className="text-sm text-gray-500">Total: ₹{order.TotalAmount}</p>
                                                     <p className="text-sm text-gray-500">Payment: {order.PaymentMethod}</p>
                                                 </div>
-                                                <button
+                                                {(order.OrderStatus === "Pending" || order.OrderStatus === "Processing") 
+                                                && <button
                                                     onClick={() => handleCancelOrder(order.OrderID)}
                                                     className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded hover:bg-red-200 transition"
                                                 >
                                                     Cancel
-                                                </button>
+                                                </button>}
                                             </div>
 
                                             <div className="flex flex-wrap gap-4">

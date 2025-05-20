@@ -1,7 +1,7 @@
 
 const pool = require('../db/db_connection');
 
-const allProductsAdmin = async(req, res) => {
+const allSellerInventoryProducts = async(req, res) => {
     const {_id} = req.user;
     try {
         // Get role of the logged-in user
@@ -39,6 +39,38 @@ const allProductsAdmin = async(req, res) => {
         return res.status(500).json({error: "Failed to fetch products"});
     }
 };
+
+const allProducts = async (req, res) => {
+    const { _id } = req.user;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+
+    try {
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (
+            adminRows.length === 0 ||
+            (adminRows[0].Role !== 'SuperAdmin' &&
+                adminRows[0].Role !== 'Inventory Administrator')
+        ) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        const [products] = await pool.query(
+            'SELECT * FROM inventory LIMIT ? OFFSET ?',
+            [limit, offset]
+        );
+
+        res.status(200).json({ products });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Failed to fetch products' });
+    }
+};
+
 
 const SearchProduct = async (req, res) => {
     const { keyword } = req.query;
@@ -287,13 +319,60 @@ const placeOrder = async (req, res) => {
     }
   };
   
+const updateProductStatus = (req, res) => {
+  const productId = req.params.id;
+  const { status } = req.body;
+  // Validate input
+  const validStatuses = ['active', 'inactive', 'suspended'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  const sql = 'UPDATE inventory SET Status = ? WHERE ProductID = ?';
+
+  pool.query(sql, [status, productId], (err, result) => {
+    if (err) {
+      console.error('Error updating status:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.json({ message: 'Status updated successfully' });
+  });
+};
+
+const deleteProduct = (req, res) => {
+  const productId = req.params.id;
+
+  const sql = 'DELETE FROM inventory WHERE ProductID = ?';
+
+  pool.query(sql, [productId], (err, result) => {
+    if (err) {
+      console.error('Error deleting product:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.json({ message: 'Product removed successfully' });
+  });
+};
+
 
 
 module.exports = {
-    allProductsAdmin,
+    allSellerInventoryProducts,
     SearchProduct,
     getProductByTerm,
     getProductById,
     getProductsByIds,
-    placeOrder
+    placeOrder,
+    allProducts,
+    updateProductStatus,
+    deleteProduct,
 };

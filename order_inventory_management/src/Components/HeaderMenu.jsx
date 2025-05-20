@@ -100,7 +100,7 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
                                 Your Products
                             </button>
                             <button
-                                // onClick={() => { navigate('/wishlist'); }} 
+                                onClick={() => handleNavigate('/sellerDash')}
                                 className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
                             >
                                 <ClipboardDocumentCheckIcon className="h-5 w-5 mr-1" />
