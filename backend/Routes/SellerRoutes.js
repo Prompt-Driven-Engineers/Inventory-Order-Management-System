@@ -9,6 +9,7 @@ const { SellerRegister,
         AddExisProduct,
         fetchSellerInventory,
         deleteFromInventory,
+        getSellerOrders,
       } = require('../Controllers/SellerController');
 const { verifyToken } = require('../Authntication/UserAuthn');
 const upload = require('../db/Upload');
@@ -25,5 +26,6 @@ router.post("/addProduct", verifyToken, upload.array("images", 5), AddProduct);
 router.post("/addExisProduct", verifyToken,  AddExisProduct);
 router.get("/sellerInventory", verifyToken,  fetchSellerInventory);
 router.delete("/removeFromInventory/:sellerInventoryId", verifyToken, deleteFromInventory);
+router.get("/orders", verifyToken, getSellerOrders);
 
 module.exports = router;

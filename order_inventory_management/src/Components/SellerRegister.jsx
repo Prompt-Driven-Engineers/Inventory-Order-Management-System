@@ -86,7 +86,7 @@ export default function SellerRegister() {
     const handleChange = (e) => {
         setForm({
             ...form,
-            [e.target.name] : e.target.value
+            [e.target.name] : e.target.value.trim()
         })
     }
 
@@ -95,7 +95,7 @@ export default function SellerRegister() {
             ...form,
             Address: {
                 ...form.Address,
-                [e.target.name] : e.target.value
+                [e.target.name] : e.target.value.trim()
             }
         });
     }

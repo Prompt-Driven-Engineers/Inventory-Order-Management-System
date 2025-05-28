@@ -278,46 +278,56 @@ const getProductsByIds = async (req, res) => {
 }
 
 const placeOrder = async (req, res) => {
-    const { CustomerID, ShippingAddressID, items, TotalAmount } = req.body;
-  
-    if (!CustomerID || !ShippingAddressID || !items || items.length === 0 || !TotalAmount) {
-      return res.status(400).json({ message: "Missing required order details" });
-    }
-  
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
-  
-      // 1. Insert into orders table
-      const [orderResult] = await connection.query(
-        `INSERT INTO orders (CustomerID, ShippingAddressID, TotalAmount, PaymentMethod)
-         VALUES (?, ?, ?, 'COD')`,
-        [CustomerID, ShippingAddressID, TotalAmount]
+  const { CustomerID, ShippingAddressID, items, TotalAmount } = req.body;
+
+  if (!CustomerID || !ShippingAddressID || !items || items.length === 0 || !TotalAmount) {
+    return res.status(400).json({ message: "Missing required order details" });
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Insert into orders table
+    const [orderResult] = await connection.query(
+      `INSERT INTO orders (CustomerID, ShippingAddressID, TotalAmount, PaymentMethod)
+       VALUES (?, ?, ?, 'COD')`,
+      [CustomerID, ShippingAddressID, TotalAmount]
+    );
+
+    const OrderID = orderResult.insertId;
+
+    // 2. Insert into orderdetails + 3. Reduce stock
+    for (const item of items) {
+      const { Price, Quantity, SellerInventoryID } = item;
+
+      // 2.1 Insert into orderdetails
+      await connection.query(
+        `INSERT INTO orderdetails (OrderID, Price, Quantity, SellerInventoryID)
+         VALUES (?, ?, ?, ?)`,
+        [OrderID, Price, Quantity, SellerInventoryID]
       );
-  
-      const OrderID = orderResult.insertId;
-  
-      // 2. Insert each item into orderdetails
-      const orderDetailPromises = items.map(item => {
-        return connection.query(
-          `INSERT INTO orderdetails (OrderID, Price, Quantity, SellerInventoryID)
-           VALUES (?, ?, ?, ?)`,
-          [OrderID, item.Price, item.Quantity, item.SellerInventoryID]
-        );
-      });
-  
-      await Promise.all(orderDetailPromises);
-  
-      await connection.commit();
-      res.status(201).json({ message: "Order placed successfully", orderId: OrderID });
-    } catch (error) {
-      await connection.rollback();
-      console.error("❌ Order placement failed:", error);
-      res.status(500).json({ message: "Internal server error", error: error.message });
-    } finally {
-      connection.release();
+
+      // 3. Reduce Quantity and CurrentStock in sellerinventory
+      await connection.query(
+        `UPDATE sellerinventory
+         SET Quantity = Quantity - ?, CurrentStock = CurrentStock - ?
+         WHERE SellerInventoryID = ?`,
+        [Quantity, Quantity, SellerInventoryID]
+      );
     }
-  };
+
+    await connection.commit();
+    res.status(201).json({ message: "Order placed successfully", orderId: OrderID });
+
+  } catch (error) {
+    await connection.rollback();
+    console.error("❌ Order placement failed:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  } finally {
+    connection.release();
+  }
+};
   
 const updateProductStatus = (req, res) => {
   const productId = req.params.id;
@@ -362,8 +372,6 @@ const deleteProduct = (req, res) => {
     res.json({ message: 'Product removed successfully' });
   });
 };
-
-
 
 module.exports = {
     allSellerInventoryProducts,

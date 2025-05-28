@@ -77,6 +77,7 @@ export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
                 {seller ? (
                 <div className="space-y-4">
                     <p className="text-gray-600"><strong>Name:</strong> {seller.name}</p>
+                    <p className="text-gray-600"><strong>Store Name:</strong> {seller.storename}</p>
                     <p className="text-gray-600"><strong>Email:</strong> {seller.email}</p>
                     <p className="text-gray-600"><strong>Phone:</strong> {seller.phone}</p>
                     <p className="text-gray-600 mt-10 font-semibold text-lg">Accout Details</p>

@@ -63,7 +63,7 @@ export default function AdminRegistration() {
     const handleChange = (e) => {
         setForm({
             ...form,
-            [e.target.name] : e.target.value
+            [e.target.name] : e.target.value.trim()
         })
     }
 
@@ -72,7 +72,7 @@ export default function AdminRegistration() {
             ...form,
             Address: {
                 ...form.Address,
-                [e.target.name] : e.target.value
+                [e.target.name] : e.target.value.trim()
             }
         });
     }

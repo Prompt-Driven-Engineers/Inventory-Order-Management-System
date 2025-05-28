@@ -36,7 +36,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     const handleChange = (e) => {
         setForm({
             ...form,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value.trim()
         })
     }
 
@@ -121,7 +121,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     const handleAdminFormChange = (e) => {
         setAdminLoginForm({
             ...adminLoginForm,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value.trim()
         });
     }
 

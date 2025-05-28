@@ -32,7 +32,7 @@ export default function AdminLogin() {
     const handleAdminFormChange = (e) => {
         setAdminLoginForm({
             ...adminLoginForm,
-            [e.target.name] : e.target.value
+            [e.target.name] : e.target.value.trim()
         });
     }
 

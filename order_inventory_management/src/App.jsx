@@ -33,6 +33,7 @@ import OrderPage from './Components/OrderPage';
 import CustomerList from './pages/CustomerList';
 import SellerInventory from './pages/SellerInventory';
 import OrdersPage from './Components/OrdersPage';
+import SellerOrdersPage from './pages/SellerOrdersPage';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -76,7 +77,7 @@ function App() {
           {isLoggedIn ? <Route path='/customerLog' element={<HomePage />} />
             : <Route path='/customerLog' element={<CustomerLogin />} />
           }
-          <Route path='/adminLog' element={<AdminLogin />} />
+          {/* <Route path='/adminLog' element={<AdminLogin />} /> */}
           <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
           <Route path='/pendingSellers' element={<PendingSellersList />} />
@@ -100,6 +101,7 @@ function App() {
           <Route path='/allProduct' element={<AllProductsList />} />
           <Route path='/sellerInventory' element={<SellerInventory />} />
           <Route path='/ordersPage' element={<OrdersPage />} />
+          <Route path='/sellerOrders' element={<SellerOrdersPage/>} />
 
           <Route path='/searchProduct' element={<ProductSearch />} />
           <Route path="/find/:searchedProduct" element={<ProductList />} />

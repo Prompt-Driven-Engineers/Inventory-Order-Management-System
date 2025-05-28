@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const pool = require('../db/db_connection');
-const {setUser, getUser} = require('../Authntication/UserAuthn');
+const { setUser, getUser } = require('../Authntication/UserAuthn');
 
 const SellerRegister = async (req, res) => {
     const connection = await pool.getConnection();
@@ -62,7 +62,7 @@ const SellerLogin = async (req, res) => {
     try {
         // **Step 1: Check if Email exists and retrieve UserID**
         const [userRows] = await connection.query(
-            `SELECT UserID FROM users WHERE Email = ?`, 
+            `SELECT UserID FROM users WHERE Email = ?`,
             [Email]
         );
 
@@ -149,7 +149,7 @@ const SellerDetails = async (req, res) => {
 
         // Merge results
         const sellerData = {
-            name: userResults[0].Name,  
+            name: userResults[0].Name,
             email: userResults[0].Email,
             phone: userResults[0].Phone,
             storename: sellerResults.length > 0 ? sellerResults[0].storename : null,
@@ -158,9 +158,9 @@ const SellerDetails = async (req, res) => {
             Status: sellerResults.length > 0 ? sellerResults[0].Status : null,
             addresses
         };
-        
+
         res.status(200).json(sellerData);
-        
+
     } catch (error) {
         console.error("Database Error:", error);
         res.status(500).json({ error: "Failed to fetch", details: error.message });
@@ -196,7 +196,7 @@ const AddProduct = async (req, res) => {
         // Insert into inventory
         const [inventoryRslt] = await connection.query(
             `INSERT INTO inventory (Name, Description, Category, Subcategory, Specifications, images)
-             VALUES (?, ?, ?, ?, ?, ?)`, 
+             VALUES (?, ?, ?, ?, ?, ?)`,
             [Name, Description, Category, ProductType, specificationsJSON, JSON.stringify(imagePaths)]
         );
 
@@ -298,7 +298,7 @@ const SellerList = async (req, res) => {
 
 const PendingSellers = async (req, res) => {
     const { _id, email } = req.user;
-    
+
     try {
         // Get role of the logged-in user
         const [adminRows] = await pool.query(
@@ -306,7 +306,7 @@ const PendingSellers = async (req, res) => {
             [_id]
         );
 
-        if (adminRows.length === 0 || 
+        if (adminRows.length === 0 ||
             (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
             return res.status(403).json({ message: "Unauthorized" });
         }
@@ -356,7 +356,7 @@ const ModifySellerStatus = async (req, res) => {
             [_id]
         );
 
-        if (adminRows.length === 0 || 
+        if (adminRows.length === 0 ||
             (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")) {
             return res.status(403).json({ message: "Unauthorized" });
         }
@@ -375,7 +375,7 @@ const ModifySellerStatus = async (req, res) => {
     }
 };
 
-const AddExisProduct = async(req, res) => {
+const AddExisProduct = async (req, res) => {
     const { _id } = req.user;
     const { ProductID, Price, Discount, Quantity } = req.body;
     try {
@@ -387,8 +387,8 @@ const AddExisProduct = async(req, res) => {
 
         if (sellerRows.length === 0) {
             return res.status(403).json({ message: "Unauthorized" });
-        } else if(sellerRows[0].Status !== "Active") {
-            return res.status(403).json({ message: `Seller status is ${sellerRows[0].Status}`});
+        } else if (sellerRows[0].Status !== "Active") {
+            return res.status(403).json({ message: `Seller status is ${sellerRows[0].Status}` });
         }
 
         const query = `
@@ -503,15 +503,66 @@ const deleteFromInventory = async (req, res) => {
     }
 };
 
-module.exports = 
-{   SellerRegister, 
+// GET /api/seller-orders/:sellerId
+const getSellerOrders = async (req, res) => {
+    const { _id } = req.user;
+
+    const query = `
+    SELECT 
+      od.OrderDetailID,
+      od.OrderID,
+      o.CustomerID,
+      o.ShippingAddressID,
+      o.TotalAmount,
+      o.PaymentMethod,
+      o.OrderStatus,
+      o.PaymentStatus,
+      o.OrderDate,
+      o.PlacedAt,
+      od.Price,
+      od.Quantity,
+      si.SellerID,
+      si.ProductID
+    FROM orderdetails od
+    JOIN sellerInventory si ON od.SellerInventoryID = si.SellerInventoryID
+    JOIN orders o ON od.OrderID = o.OrderID
+    WHERE si.SellerID = ?
+    ORDER BY o.OrderDate DESC
+  `;
+
+    try {
+        // Step 1: Validate seller
+        const [sellerRows] = await pool.query(
+            'SELECT Status FROM sellers WHERE SellerID = ?',
+            [_id]
+        );
+
+        if (sellerRows.length === 0) {
+            return res.status(403).json({ message: "Unauthorized: Seller not found" });
+        }
+
+        if (sellerRows[0].Status !== "Active") {
+            return res.status(403).json({ message: `Access denied: Seller status is ${sellerRows[0].Status}` });
+        }
+        const [rows] = await pool.execute(query, [_id]);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Error fetching seller orders:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+module.exports =
+{
+    SellerRegister,
     SellerLogin,
-    SellerDetails, 
-    AddProduct, 
-    SellerList, 
+    SellerDetails,
+    AddProduct,
+    SellerList,
     PendingSellers,
     ModifySellerStatus,
     AddExisProduct,
     fetchSellerInventory,
     deleteFromInventory,
+    getSellerOrders,
 };
