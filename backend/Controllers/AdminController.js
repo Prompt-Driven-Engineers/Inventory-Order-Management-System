@@ -527,6 +527,63 @@ const fetchAllOrdersWithDetails = async (req, res) => {
     }
 };
 
+const fetchReorderList = async (req, res) => {
+    const { _id } = req.user;
+    try {
+        // 1. Check if user is SuperAdmin
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (!adminRows.length || adminRows[0].Role !== "SuperAdmin") {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        // 2. Fetch total stock and quantity per product
+        const [InventoryRows] = await pool.query(
+            `SELECT ProductID, 
+                    SUM(CurrentStock) AS TotalStock, 
+                    SUM(Quantity) AS TotalQuantity 
+             FROM SellerInventory 
+             GROUP BY ProductID`
+        );
+
+        // 3. Filter products that need reorder
+        const alertRows = InventoryRows.filter(row =>
+            Number(row.TotalStock) <= 25
+        );
+
+        const ProductIDs = alertRows.map(alert => alert.ProductID);
+
+        // 4. Fetch product details
+        let mergedData = [];
+        if (ProductIDs.length > 0) {
+            const [productDetails] = await pool.query(
+                `SELECT * FROM Inventory WHERE ProductID IN (${ProductIDs.map(() => '?').join(',')})`,
+                ProductIDs
+            );
+
+            // 5. Merge data
+            mergedData = alertRows.map(alert => {
+                const product = productDetails.find(p => p.ProductID === alert.ProductID);
+                return {
+                    ...product,
+                    TotalStock: Number(alert.TotalStock),
+                    TotalQuantity: Number(alert.TotalQuantity)
+                };
+            });
+        }
+
+        // 6. Return final merged result
+        return res.status(200).json(mergedData);
+
+    } catch (err) {
+        console.error("Error fetching Reorder List:", err);
+        return res.status(500).json({ message: "Server Error" });
+    }
+};
+
 module.exports = {
     AdminLogin,
     AdminDetails,
@@ -538,4 +595,5 @@ module.exports = {
     fetchSellerInventory,
     updateInventoryStatus,
     fetchAllOrdersWithDetails,
+    fetchReorderList,
 }

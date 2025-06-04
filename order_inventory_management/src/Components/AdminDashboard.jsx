@@ -45,7 +45,14 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
 
                 {/* Admin Controls */}
                 <div className="space-y-10">
-
+                    {admin?.Role === "SuperAdmin" && 
+                        <div 
+                            onClick={() => {navigate('/reorderList')}}
+                            className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                        >
+                            Reorder Alearts
+                        </div>
+                    }
                     {/* Admin Management */}
                     {admin?.Role === "SuperAdmin" && (
                         <section className="bg-white p-6 rounded-xl shadow">

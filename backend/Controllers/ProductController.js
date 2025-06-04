@@ -311,9 +311,9 @@ const placeOrder = async (req, res) => {
       // 3. Reduce Quantity and CurrentStock in sellerinventory
       await connection.query(
         `UPDATE sellerinventory
-         SET Quantity = Quantity - ?, CurrentStock = CurrentStock - ?
+         SET CurrentStock = CurrentStock - ?
          WHERE SellerInventoryID = ?`,
-        [Quantity, Quantity, SellerInventoryID]
+        [Quantity, SellerInventoryID]
       );
     }
 

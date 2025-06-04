@@ -8,14 +8,14 @@ export default function AdminDetails() {
         axios.get(`http://localhost:8000/admins/adminList`, {
             withCredentials: true
         })
-            .then((res) => {
-                setAdmins(res.data.admins); // Correctly accessing response data
-                console.log(res.data.admins); // Log actual data
-            })
-            .catch((err) => {
-                console.error("Error fetching admin:", err);
-                setAdmins([]); // Set empty array instead of null (better for rendering)
-            });
+        .then((res) => {
+            setAdmins(res.data.admins); // Correctly accessing response data
+            console.log(res.data.admins); // Log actual data
+        })
+        .catch((err) => {
+            console.error("Error fetching admin:", err);
+            setAdmins([]); // Set empty array instead of null (better for rendering)
+        });
     }, []);
 
     return (
