@@ -35,6 +35,7 @@ import SellerInventory from './pages/SellerInventory';
 import OrdersPage from './Components/OrdersPage';
 import SellerOrdersPage from './pages/SellerOrdersPage';
 import ReOrderList from './Components/ReOrderList';
+import SellsDashboard from './pages/SellsDashboard';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -104,6 +105,7 @@ function App() {
           <Route path='/ordersPage' element={<OrdersPage />} />
           <Route path='/sellerOrders' element={<SellerOrdersPage/>} />
           <Route path='/reorderList' element={<ReOrderList />} />
+          <Route path='/sellsList' element={<SellsDashboard />} />
 
           <Route path='/searchProduct' element={<ProductSearch />} />
           <Route path="/find/:searchedProduct" element={<ProductList />} />

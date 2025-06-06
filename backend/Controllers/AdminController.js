@@ -584,6 +584,68 @@ const fetchReorderList = async (req, res) => {
     }
 };
 
+const fetchSellsDasboard = async(req, res) => {
+    const { _id } = req.user;
+    try {
+        // Step 1: Check admin role
+        const [adminRows] = await pool.query(
+            'SELECT Role FROM admins WHERE UserID = ?',
+            [_id]
+        );
+
+        if (
+            !adminRows.length ||
+            (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Seller Administrator")
+        ) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        const [summaryRows] = await pool.query(`
+            SELECT 
+                sellerInventory.ProductID,
+                AVG(orderDetails.Price) AS AvgPrice,
+                SUM(orderDetails.Quantity) AS TotalQuantity
+            FROM 
+                orderDetails
+            JOIN 
+                sellerInventory ON orderDetails.SellerInventoryID = sellerInventory.SellerInventoryID
+            GROUP BY 
+                sellerInventory.ProductID
+        `);
+
+        const ProductIDs = summaryRows.map(order => order.ProductID);
+
+        const [productDetails] = await pool.query(
+            `SELECT * FROM Inventory WHERE ProductID IN (${ProductIDs.map(() => '?').join(',')})`,
+            ProductIDs
+        );
+
+        // Convert summaryRows to a map for fast lookup
+        const summaryMap = new Map();
+        summaryRows.forEach(row => {
+            summaryMap.set(row.ProductID, {
+                AvgPrice: row.AvgPrice,
+                TotalQuantity: row.TotalQuantity
+            });
+        });
+
+        // Merge productDetails with summary info
+        const sellsData = productDetails.map(product => {
+            const summary = summaryMap.get(product.ProductID) || { AvgPrice: 0, TotalQuantity: 0 };
+            
+            return {
+                ...product,                // all fields from Inventory table
+                AvgPrice: summary.AvgPrice,
+                TotalQuantity: summary.TotalQuantity
+            };
+        });
+        return res.status(200).json(sellsData);
+    } catch (err) {
+        console.error("Error fetching Sells List:", err);
+        return res.status(500).json({ message: "Server Error" });
+    }
+}
+
 module.exports = {
     AdminLogin,
     AdminDetails,
@@ -596,4 +658,5 @@ module.exports = {
     updateInventoryStatus,
     fetchAllOrdersWithDetails,
     fetchReorderList,
+    fetchSellsDasboard,
 }

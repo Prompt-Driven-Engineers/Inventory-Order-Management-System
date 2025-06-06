@@ -1,7 +1,8 @@
 const express = require('express');
 const { AdminLogin, AdminDetails, AdminRegister, AdminList, 
     AdminListMod, ModifyRole, ModifyStatus, fetchSellerInventory, 
-    updateInventoryStatus, fetchAllOrdersWithDetails, fetchReorderList } = require('../Controllers/AdminController');
+    updateInventoryStatus, fetchAllOrdersWithDetails, fetchReorderList,
+    fetchSellsDasboard, } = require('../Controllers/AdminController');
 const { verifyToken } = require('../Authntication/UserAuthn');
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.get('/sellerInventory', verifyToken, fetchSellerInventory);
 router.put('/updateStatus/:inventoryId', verifyToken, updateInventoryStatus);
 router.get('/allOrders', verifyToken, fetchAllOrdersWithDetails);
 router.get('/reorderList', verifyToken, fetchReorderList);
+router.get('/sellsDash', verifyToken, fetchSellsDasboard);
 
 module.exports = router;
