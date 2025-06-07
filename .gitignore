@@ -17,6 +17,7 @@ order_inventory_management/node_modules/
 order_inventory_management/.next/
 order_inventory_management/dist/
 order_inventory_management/.env.local
+order_inventory_management/public
 
 # Editor directories and system files
 .vscode/
