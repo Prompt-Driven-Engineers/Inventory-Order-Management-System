@@ -32,7 +32,8 @@ const productCategories = {
                     { name: 'SmartTV', type: 'boolean', required: true} // Whether it's a Smart TV
                 ]
             }
-        }
+        },
+        imageUrl: "electronics.jpg"
     },
     HomeAppliances: {
         productTypes: {
@@ -64,7 +65,8 @@ const productCategories = {
                     { name: "Type", type: "string", required: true } // e.g., Split, Window
                 ]
             }
-        }
+        },
+        imageUrl: "home_appliences.jpg"
     },
     Fashion: {
         productTypes: {
@@ -96,7 +98,8 @@ const productCategories = {
                     { name: 'Waterproof', type: 'boolean', required: true }
                 ]
             }
-        }
+        },
+        imageUrl: "fashion.jpg"
     },
     Groceries: {
         productTypes: {
@@ -121,7 +124,8 @@ const productCategories = {
                     { name: 'Organic', type: 'boolean', required: true }
                 ]
             }
-        }
+        },
+        imageUrl: "groceries.jpeg"
     },
 };
 

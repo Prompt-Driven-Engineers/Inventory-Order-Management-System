@@ -12,4 +12,4 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-module.exports = pool.promise(); // Export as a promise-based pool
+module.exports = pool.promise();
