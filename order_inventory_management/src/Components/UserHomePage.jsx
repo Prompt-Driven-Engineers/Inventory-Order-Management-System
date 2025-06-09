@@ -51,12 +51,12 @@ export default function UserHomePage() {
                         onClick={() => handleBrowse(category)}
                         className="flex flex-col items-center justify-center h-40 w-40 bg-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 "
                     >
-                        {/* <span className="text-xl font-medium">{category}</span> */}
-                        <img
+                        <span className="text-xl font-medium">{category}</span>
+                        {/* <img
                             src={`/${productCategories[category].imageUrl}`}
                             alt={category}
                             className="object-cover mb-2 rounded"
-                        />
+                        /> */}
                     </div>
                 ))}
             </div>

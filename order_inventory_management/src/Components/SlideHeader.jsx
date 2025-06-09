@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const actualRoles = ['customer', 'seller', 'admin', 'warehouse'];
-// Add extra elements before and after for circular illusion
+const actualRoles = ['customer', 'seller', 'admin'];
+
 const roles = [
   ...actualRoles.slice(-2), // ['admin', 'warehouse']
   ...actualRoles,           // ['customer', 'vendor', 'admin', 'warehouse']

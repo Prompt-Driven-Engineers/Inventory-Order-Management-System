@@ -34,16 +34,28 @@ export default function SellerRegister() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const states = countries.find((c) => c.name === form.Address.Country)?.states || [];
-
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const validateForm = () => {
         console.log('Inside validation');
         let newErrors = {};
     
-        if (!form.Name.trim()) newErrors.Name = "Full Name is required";
-        if (!/\S+@\S+\.\S+/.test(form.Email)) newErrors.Email = "Enter Valid Email";
-        if (!form.Email.trim()) newErrors.Email = "Email is required";
-        if (!/^[1-9]\d{9}$/.test(form.Phone)) newErrors.Phone = "Enter Valid 10-digit Phone Number";
-        if (!form.Phone.trim()) newErrors.Phone = "Phone Number is required";
+        if (!form.Name.trim()) {
+            newErrors.Name = "Full Name is required";
+        } else if (!/^[A-Za-z\s'-]+$/.test(form.Name)) {
+            newErrors.Name = "Name can only contain letters, spaces, hyphens, or apostrophes";
+        }
+
+        if (!form.Email.trim()) {
+            newErrors.Email = "Email is required";
+        } else if (!emailRegex.test(form.Email) || form.Email.includes('..') || form.Email.endsWith('.')) {
+            newErrors.Email = "Enter a valid email";
+        }
+        if (!form.Phone.trim()) {
+            newErrors.Phone = "Phone Number is required";
+        } else if (!/^[6-9]\d{9}$/.test(form.Phone) || /^(\d)\1{9}$/.test(form.Phone)) {
+            newErrors.Phone = "Enter a valid 10-digit phone number";
+        }
+
         if (!form.StoreName.trim()) newErrors.StoreName = "Store Name is required";
         if (!form.StoreDesc.trim()) newErrors.StoreDesc = "Store Description is required";
         if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.PAN)) newErrors.PAN = "Enter Valid PAN";
@@ -53,7 +65,11 @@ export default function SellerRegister() {
         if (!form.Address.City.trim()) newErrors.City = "City is required";
         if (!form.Address.State.trim()) newErrors.State = "State is required";
         if (!form.Address.Country.trim()) newErrors.Country = "Country is required";
-        if (!form.Address.ZIP.trim() || !/^\d{6}$/.test(form.Address.ZIP)) newErrors.ZIP = "Valid 6-digit ZIP code is required";
+        if (!form.Address.ZIP.trim()) {
+            newErrors.ZIP = "ZIP code is required";
+        } else if (!/^[1-9][0-9]{5}$/.test(form.Address.ZIP) || /^(\d)\1{5}$/.test(form.Address.ZIP)) {
+            newErrors.ZIP = "Enter a valid 6-digit Indian ZIP code";
+        }
         if (!form.Address.AddressType.trim()) newErrors.AddressType = "Address Type is required";
 
         // Validate Account Number

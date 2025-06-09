@@ -195,7 +195,7 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                                         <li key={order.OrderID} className="p-4 bg-gray-50 rounded shadow-sm space-y-2">
                                             <div className="flex justify-between items-start flex-wrap gap-2">
                                                 <div>
-                                                    <p className="text-gray-700 font-medium">Order #{order.OrderID}</p>
+                                                    {/* <p className="text-gray-700 font-medium">Order #{order.OrderID}</p> */}
                                                     <p className="text-sm text-gray-500">Status: {order.OrderStatus}</p>
                                                     <p className="text-sm text-gray-500">Expected: {formatOrderDate(order.OrderDate)}</p>
                                                     <p className="text-sm text-gray-500">Total: ₹{order.TotalAmount}</p>

@@ -17,12 +17,16 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
         Password: ''
     });
 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
     const validateForm = () => {
         let newErrors = {};
 
-        if (!/\S+@\S+\.\S+/.test(form.Email)) newErrors.Email = "Enter Valid Email";
-        if (!form.Email.trim()) newErrors.Email = "Email is required";
-
+        if (!form.Email.trim()) {
+            newErrors.Email = "Email is required";
+        } else if (!emailRegex.test(form.Email) || form.Email.includes('..') || form.Email.endsWith('.')) {
+            newErrors.Email = "Enter a valid email";
+        }
 
         // Password validation
         if (form.Password.length < 6) newErrors.Password = "Password must be at least 6 characters";
@@ -262,7 +266,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 {/* New User Call to Action */}
                 <div className="text-center mt-4">
                     <p className="text-gray-600">Don't have an account?</p>
-                    <a onClick={() => navigate('/customerReg')} className="text-blue-500 font-semibold hover:underline">Sign up now</a>
+                    <a onClick={() => navigate('/customerReg')} className="text-blue-500 font-semibold hover:underline">Sign up now as user</a>
                 </div>
             </div>
         </div>
