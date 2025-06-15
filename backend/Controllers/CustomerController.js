@@ -132,7 +132,7 @@ const CustomerDetails = async (req, res) => {
         );
 
         const [customerRows] = await pool.query(
-            'SELECT SubscriptionStatus, TotalOrders, Points FROM customers WHERE CustomerID = ?',
+            'SELECT SubscriptionStatus, Status, TotalOrders, Points FROM customers WHERE CustomerID = ?',
             [_id]
         )
 
@@ -154,6 +154,7 @@ const CustomerDetails = async (req, res) => {
             email: userResults[0].Email,
             phone: userResults[0].Phone,
             SubscriptionStatus: customerRows[0].SubscriptionStatus,
+            Status: customerRows[0].Status,
             TotalOrders: customerRows[0].TotalOrders,
             Points: customerRows[0].Points,
             addresses

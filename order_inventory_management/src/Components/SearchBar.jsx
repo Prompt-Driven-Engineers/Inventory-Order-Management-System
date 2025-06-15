@@ -35,9 +35,9 @@ export default function SearchBar({}) {
     const onSuggestionSelected = async (event, { suggestion }) => {
         // console.log(searchedProduct);
         if(searchedProduct) {
-            navigate(`/find/${searchedProduct}`);
+            navigate(`/find/${suggestion.Name}`);
         }
-        setSearchedProduct(suggestion.Name);
+        // setSearchedProduct(suggestion.Name);
         // if (onProductSelect) {
         //     onProductSelect(suggestion);
         // }

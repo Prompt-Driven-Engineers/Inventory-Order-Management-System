@@ -95,12 +95,12 @@ export default function OrderPage({ isLoggedIn, user }) {
         toast.success("Order placed successfully!");
         navigate('/customerDash', { replace: true});
       } else {
-        console.warn("⚠️ Order failed:", result.message);
-        // toast.error("Order failed: " + result.message);
+        // console.warn("⚠️ Order failed:", result.message);
+        toast.error("Order failed");
       }
     } catch (error) {
-      console.error("❌ Network error:", error);
-      // toast.error("Something went wrong. Try again.");
+      // console.error("❌ Network error:", error);
+      toast.error("Something went wrong. Try again.");
     }
   };
 

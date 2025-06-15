@@ -123,6 +123,10 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                     <p className="text-gray-600"><strong>Subscription:</strong> {customer.SubscriptionStatus}</p>
                     <p className="text-gray-600"><strong>Points:</strong> {customer.Points}</p>
                     <p className="text-gray-600"><strong>Total Orders:</strong> {customer.TotalOrders}</p>
+                    <p className="text-gray-600"><strong>Account Status:</strong>
+                        {customer.Status === 'Active' ? <span className="text-green-500"> {customer.Status}</span>
+                        : <span className="text-red-500"> {customer.Status}</span>}  
+                    </p>
 
                     {address && (
                         <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">

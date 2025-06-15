@@ -13,19 +13,19 @@ export default function ProductList() {
   const navigate = useNavigate();
   const { filterForm } = useParams();
 
-  useEffect( () => {
+  useEffect(() => {
     if (searchedProduct) {
       fetchByName();
     }
   }, [searchedProduct]);
 
-  const fetchByName = async() => {
+  const fetchByName = async () => {
     setFilteredProducts([]);
     const response = await fetch(`http://localhost:8000/products/getByName?name=${searchedProduct}`, {
-        method: 'GET',
-        headers:  {
-          'Content-Type': 'application/json'
-        }
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     const result = await response.json();
     setFilteredProducts(result.length ? result : []);
@@ -35,20 +35,20 @@ export default function ProductList() {
 
   const handleFilterChange = (e) => {
     setForm({
-        ...form,
-        productType: currentPrdctType,
-        attributes: {
-            ...form.attributes,
-            [e.target.name] : e.target.value
-        }
+      ...form,
+      productType: currentPrdctType,
+      attributes: {
+        ...form.attributes,
+        [e.target.name]: e.target.value
+      }
     });
   }
 
-  const handleApplyFilter = async(e) => {
+  const handleApplyFilter = async (e) => {
     e.preventDefault();
-    
+
   }
-    
+
   return (
     <div className="flex w-full">
 
@@ -74,23 +74,23 @@ export default function ProductList() {
                     const id = product.SellerInventoryID || product.ProductID;
                     const type = product.SellerInventoryID ? "seller" : "product";
                     navigate(`/visit/${id}?type=${type}`);
-                  }}                  
+                  }}
                   className="flex items-center bg-white my-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all ease-in-out cursor-pointer"
                 >
-                {/* Product Image */}
-                <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
-                  {getFirstImage(product.images) ? (
-                    <img
+                  {/* Product Image */}
+                  <div className="w-24 h-24 flex-shrink-0 mr-4 p-2 bg-gray-100 rounded-lg">
+                    {getFirstImage(product.images) ? (
+                      <img
                         src={getFirstImage(product.images)}
                         alt={product.Name}
                         className="w-full h-full object-contain rounded-lg"
-                    />
+                      />
                     ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-lg">
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-lg">
                         <span className="text-gray-500 text-sm">No Image</span>
-                    </div>
-                  )}
-                </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Product Details */}
                   <div className="flex-grow">

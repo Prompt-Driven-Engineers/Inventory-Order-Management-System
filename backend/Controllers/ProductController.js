@@ -1,8 +1,8 @@
 
 const pool = require('../db/db_connection');
 
-const allSellerInventoryProducts = async(req, res) => {
-    const {_id} = req.user;
+const allSellerInventoryProducts = async (req, res) => {
+    const { _id } = req.user;
     try {
         // Get role of the logged-in user
         const [adminRows] = await pool.query(
@@ -10,7 +10,7 @@ const allSellerInventoryProducts = async(req, res) => {
             [_id]
         );
 
-        if (adminRows.length === 0 || 
+        if (adminRows.length === 0 ||
             (adminRows[0].Role !== "SuperAdmin" && adminRows[0].Role !== "Inventory Administrator")) {
             return res.status(403).json({ message: "Unauthorized" });
         }
@@ -18,9 +18,9 @@ const allSellerInventoryProducts = async(req, res) => {
         const [products] = await pool.query(
             'SELECT * FROM sellerInventory'
         );
-        
+
         const productIds = products.map(product => product.ProductID);
-        if(productIds.length == 0) return res.status(200).json({products: []});
+        if (productIds.length == 0) return res.status(200).json({ products: [] });
 
         const [productDetails] = await pool.query(
             'SELECT * FROM inventory WHERE ProductID IN (?)',
@@ -29,14 +29,14 @@ const allSellerInventoryProducts = async(req, res) => {
 
         const productList = products.map(product => {
             const pdtdtl = productDetails.find(pdtdtl => pdtdtl.ProductID === product.ProductID);
-            return {...product, ...pdtdtl};
+            return { ...product, ...pdtdtl };
         });
 
-        res.status(200).json({products: productList});
-        
-    } catch(error) {
+        res.status(200).json({ products: productList });
+
+    } catch (error) {
         console.error(error);
-        return res.status(500).json({error: "Failed to fetch products"});
+        return res.status(500).json({ error: "Failed to fetch products" });
     }
 };
 
@@ -79,12 +79,16 @@ const SearchProduct = async (req, res) => {
         const query = `
             SELECT ProductID, Name, Brand, Category, Subcategory, images 
             FROM inventory
-            WHERE Name LIKE ? 
-               OR Category LIKE ? 
-               OR Subcategory LIKE ? 
-               OR Brand LIKE ?
+            WHERE (
+                Name LIKE ? 
+                OR Category LIKE ? 
+                OR Subcategory LIKE ? 
+                OR Brand LIKE ?
+            ) 
+            AND Status = 'active'
             LIMIT 10
         `;
+
         const [results] = await pool.execute(query, [
             `%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`
         ]);
@@ -103,10 +107,10 @@ const getProductByTerm = async (req, res) => {
         return res.status(400).json({ message: 'Search term is missing' });
     }
 
-    const connection = await pool.getConnection(); // Or use pool.query if you're using pooling
+    const connection = await pool.getConnection();
 
     try {
-        const searchTerms = name.trim().split(/\s+/); // split by spaces
+        const searchTerms = name.trim().split(/\s+/);
         const likePatterns = searchTerms.map(term => `%${term}%`);
 
         let whereClauses = [];
@@ -128,7 +132,7 @@ const getProductByTerm = async (req, res) => {
         const query = `
             SELECT *, 0 AS relevance
             FROM inventory
-            WHERE ${whereClauses.join(" AND ")} 
+            WHERE ${whereClauses.join(" AND ")} AND Status = 'active'
             LIMIT 50;
         `;
 
@@ -142,7 +146,7 @@ const getProductByTerm = async (req, res) => {
 
         // Fetch seller inventory for these products
         const [sellerRows] = await connection.execute(
-            `SELECT * FROM sellerinventory WHERE ProductID IN (${productIds.map(() => '?').join(',')})`,
+            `SELECT * FROM sellerinventory WHERE ProductID IN (${productIds.map(() => '?').join(',')}) AND Status = 'Approved'`,
             productIds
         );
 
@@ -278,99 +282,112 @@ const getProductsByIds = async (req, res) => {
 }
 
 const placeOrder = async (req, res) => {
-  const { CustomerID, ShippingAddressID, items, TotalAmount } = req.body;
+    const { CustomerID, ShippingAddressID, items, TotalAmount } = req.body;
 
-  if (!CustomerID || !ShippingAddressID || !items || items.length === 0 || !TotalAmount) {
-    return res.status(400).json({ message: "Missing required order details" });
-  }
+    if (!CustomerID || !ShippingAddressID || !items || items.length === 0 || !TotalAmount) {
+        return res.status(400).json({ message: "Missing required order details" });
+    }
 
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
 
-    // 1. Insert into orders table
-    const [orderResult] = await connection.query(
-      `INSERT INTO orders (CustomerID, ShippingAddressID, TotalAmount, PaymentMethod)
-       VALUES (?, ?, ?, 'COD')`,
-      [CustomerID, ShippingAddressID, TotalAmount]
-    );
+        const [customerRows] = await pool.query(
+            'SELECT Status FROM Customers WHERE CustomerID = ?',
+            [CustomerID]
+        );
 
-    const OrderID = orderResult.insertId;
+        if (customerRows.length === 0) {
+            return res.status(404).json({ message: 'Customer not found' });
+        }
 
-    // 2. Insert into orderdetails + 3. Reduce stock
-    for (const item of items) {
-      const { Price, Quantity, SellerInventoryID } = item;
+        if (customerRows[0].Status !== 'Active') {
+            return res.status(403).json({ Status: customerRows[0].Status });
+        }
 
-      // 2.1 Insert into orderdetails
-      await connection.query(
-        `INSERT INTO orderdetails (OrderID, Price, Quantity, SellerInventoryID)
+        // 1. Insert into orders table
+        const [orderResult] = await connection.query(
+            `INSERT INTO orders (CustomerID, ShippingAddressID, TotalAmount, PaymentMethod)
+            VALUES (?, ?, ?, 'COD')`,
+            [CustomerID, ShippingAddressID, TotalAmount]
+        );
+
+        const OrderID = orderResult.insertId;
+
+        // 2. Insert into orderdetails + 3. Reduce stock
+        for (const item of items) {
+            const { Price, Quantity, SellerInventoryID } = item;
+
+            // 2.1 Insert into orderdetails
+            await connection.query(
+                `INSERT INTO orderdetails (OrderID, Price, Quantity, SellerInventoryID)
          VALUES (?, ?, ?, ?)`,
-        [OrderID, Price, Quantity, SellerInventoryID]
-      );
+                [OrderID, Price, Quantity, SellerInventoryID]
+            );
 
-      // 3. Reduce Quantity and CurrentStock in sellerinventory
-      await connection.query(
-        `UPDATE sellerinventory
+            // 3. Reduce Quantity and CurrentStock in sellerinventory
+            await connection.query(
+                `UPDATE sellerinventory
          SET CurrentStock = CurrentStock - ?
          WHERE SellerInventoryID = ?`,
-        [Quantity, SellerInventoryID]
-      );
+                [Quantity, SellerInventoryID]
+            );
+        }
+
+        await connection.commit();
+        res.status(201).json({ message: "Order placed successfully", orderId: OrderID });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("❌ Order placement failed:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    } finally {
+        connection.release();
     }
-
-    await connection.commit();
-    res.status(201).json({ message: "Order placed successfully", orderId: OrderID });
-
-  } catch (error) {
-    await connection.rollback();
-    console.error("❌ Order placement failed:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
-  } finally {
-    connection.release();
-  }
 };
-  
+
 const updateProductStatus = (req, res) => {
-  const productId = req.params.id;
-  const { status } = req.body;
-  // Validate input
-  const validStatuses = ['active', 'inactive', 'suspended'];
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({ message: 'Invalid status value' });
-  }
-
-  const sql = 'UPDATE inventory SET Status = ? WHERE ProductID = ?';
-
-  pool.query(sql, [status, productId], (err, result) => {
-    if (err) {
-      console.error('Error updating status:', err);
-      return res.status(500).json({ message: 'Database error' });
+    const productId = req.params.id;
+    const { status } = req.body;
+    // Validate input
+    const validStatuses = ['active', 'inactive', 'suspended'];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: 'Invalid status value' });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    const sql = 'UPDATE inventory SET Status = ? WHERE ProductID = ?';
 
-    res.json({ message: 'Status updated successfully' });
-  });
+    pool.query(sql, [status, productId], (err, result) => {
+        if (err) {
+            console.error('Error updating status:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        res.json({ message: 'Status updated successfully' });
+    });
 };
 
 const deleteProduct = (req, res) => {
-  const productId = req.params.id;
+    const productId = req.params.id;
 
-  const sql = 'DELETE FROM inventory WHERE ProductID = ?';
+    const sql = 'DELETE FROM inventory WHERE ProductID = ?';
 
-  pool.query(sql, [productId], (err, result) => {
-    if (err) {
-      console.error('Error deleting product:', err);
-      return res.status(500).json({ message: 'Database error' });
-    }
+    pool.query(sql, [productId], (err, result) => {
+        if (err) {
+            console.error('Error deleting product:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
 
-    res.json({ message: 'Product removed successfully' });
-  });
+        res.json({ message: 'Product removed successfully' });
+    });
 };
 
 module.exports = {
