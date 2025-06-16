@@ -102,7 +102,6 @@ const SearchProduct = async (req, res) => {
 
 const getProductByTerm = async (req, res) => {
     const name = req.query.name;
-    console.log(name);
     if (!name) {
         return res.status(400).json({ message: 'Search term is missing' });
     }
@@ -298,11 +297,11 @@ const placeOrder = async (req, res) => {
         );
 
         if (customerRows.length === 0) {
-            return res.status(404).json({ message: 'Customer not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
 
         if (customerRows[0].Status !== 'Active') {
-            return res.status(403).json({ Status: customerRows[0].Status });
+            return res.status(403).json({ message: `Your account status is ${customerRows[0].Status}` });
         }
 
         // 1. Insert into orders table

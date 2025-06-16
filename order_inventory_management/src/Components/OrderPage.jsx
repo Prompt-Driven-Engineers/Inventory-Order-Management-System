@@ -32,12 +32,11 @@ export default function OrderPage({ isLoggedIn, user }) {
             Price: Math.round(p.Price - p.Price * (p.Discount / 100))
           }));
           setOproducts(productsWithQuantity);
-          console.log(result.products);
         } else {
-          console.warn('⚠️ Error fetching products:', result.message);
+          toast.warn(`⚠️ Error fetching products: ${result.message}`);
         }
       } catch (error) {
-        console.error('❌ Network error while fetching products:', error);
+        toast.error('❌ Network error while fetching products');
       }
     };
 
@@ -53,7 +52,7 @@ export default function OrderPage({ isLoggedIn, user }) {
           setCustomer(res.data); // ✅ Store only the response data
         })
         .catch((err) => {
-          console.error("Error fetching customer:", err);
+          toast.error("Error fetching user details");
           setCustomer(null); // Ensure state is handled on error
         });
     }
@@ -95,15 +94,12 @@ export default function OrderPage({ isLoggedIn, user }) {
         toast.success("Order placed successfully!");
         navigate('/customerDash', { replace: true});
       } else {
-        // console.warn("⚠️ Order failed:", result.message);
-        toast.error("Order failed");
+        toast.error(`⚠️ Order failed: ${result.message}`);
       }
     } catch (error) {
-      // console.error("❌ Network error:", error);
       toast.error("Something went wrong. Try again.");
     }
   };
-
 
   return (
     <>

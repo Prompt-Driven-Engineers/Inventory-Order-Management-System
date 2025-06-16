@@ -1,8 +1,11 @@
 import React, {useState} from 'react';
 import { countries } from '../Data/Country_States';
 import { Roles } from '../Data/Roles'; // Import the roles array
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminRegistration() {
+    const navigate = useNavigate();
     const [form, setForm] = useState({
         Name: '',
         Email: '',
@@ -113,11 +116,10 @@ export default function AdminRegistration() {
                 throw new Error(result.error || 'Something went wrong');
             }
     
-            console.log("Registration successful:", result);
-            alert("Registration successful!"); // Show success message to the user
+            toast.success("Registration successful:");
+            navigate('/adminDash', { replace: true});
         } catch (error) {
-            console.error("Error during registration:", error.message);
-            alert(error.message); // Show error message to the user
+            toast.error("Error during registration");
         }
     };    
 

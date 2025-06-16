@@ -18,6 +18,8 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
         Suspended: 'text-red-600'
     };
 
+    if(admin && admin.AccountStatus !== 'Active')
+
     return (
         <div className="flex min-h-screen">
             {/* Left Sidebar */}
@@ -38,7 +40,7 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
             </LeftSidebar>
 
             {/* Right Content Area */}
-            <div className="ml-0 sm:ml-[25%] flex-1 p-6 bg-gray-100 min-h-screen overflow-auto">
+            {(admin && admin.AccountStatus === 'Active') ? <div className="ml-0 sm:ml-[25%] flex-1 p-6 bg-gray-100 min-h-screen overflow-auto">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">
                     Welcome, {admin?.name || ""}
                 </h1>
@@ -179,6 +181,7 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
                     )}
                 </div>
             </div>
+            : <div className="ml-0 sm:ml-[25%] p-4 flex items-center justify-center text-red-400 text-xl">Your account is {admin.AccountStatus}. Contact Admin</div>}
         </div>
     );
 };
