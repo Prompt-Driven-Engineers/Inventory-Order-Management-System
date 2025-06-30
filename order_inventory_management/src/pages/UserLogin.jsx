@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { replace, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from 'react-toastify';
-import RoleSelector from './SlideHeader';
+import RoleSelector from '../Components/SlideHeader';
 
 export default function UserLogin({ setUser, setIsLoggedIn }) {
     // State to track which tab is active (default is 'customer')
     const [activeTab, setActiveTab] = useState('customer');
     const [errors, setErrors] = useState({});
+    const location = useLocation();
+    const from = `${location.state?.from?.pathname}${location.state?.from?.search || ''}`;
 
     const [showPassword, setShowPassword] = useState(false);
 
@@ -63,7 +65,9 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                     toast.error(result.error || 'Something went wrong');
                 } else {
                     setIsLoggedIn(true);
-                    navigate(`/customerDash`, { replace: true });
+                    console.log(from);
+                    if(from) navigate(from, { replace: true });
+                    else navigate(`/customerDash`, { replace: true });
                     toast.success("Login successful!");
                 }
 
@@ -87,7 +91,8 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                     toast.error(result.error || 'Something went wrong')
                 } else {
                     setIsLoggedIn(true);
-                    navigate(`/sellerDash`, { replace: true });
+                    if(from) navigate(from, { replace: true });
+                    else navigate(`/sellerDash`, { replace: true });
                     toast.success("Login successful!");
                 }
 
@@ -150,7 +155,9 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 toast.error(result.error || 'Something went wrong')
             } else {
                 setIsLoggedIn(true);
-                navigate(`/adminDash`, { replace: true });
+                console.log(from);
+                if(from) navigate(from, { replace: true });
+                else navigate(`/adminDash`, { replace: true });
                 toast.success("Login successful!");
             }
 

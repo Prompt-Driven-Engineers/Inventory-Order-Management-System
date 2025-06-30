@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 export default function ProductPage({ isLoggedIn, user }) {
     const { productId } = useParams();
@@ -9,6 +9,8 @@ export default function ProductPage({ isLoggedIn, user }) {
     const navigate = useNavigate();
     const [wishlisted, setWishlisted] = useState(false);
     const [carted, setCarted] = useState(false);
+
+    const location = useLocation();
 
     // Fetch product by ID
     const fetchById = async () => {
@@ -228,14 +230,20 @@ export default function ProductPage({ isLoggedIn, user }) {
                     {/* Wishlist Button */}
                     {wishlisted ? (
                         <button
-                            onClick={() => { isLoggedIn ? toggleWishlist() : navigate('/userLogin') }}
+                            onClick={() => toggleWishlist() }
                             className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all flex items-center"
                         >
                             <i className="fas fa-heart mr-2"></i> Liked
                         </button>
                     ) : (
                         <button
-                            onClick={() => { isLoggedIn ? toggleWishlist() : navigate('/userLogin') }}
+                            onClick={() => { 
+                                if(isLoggedIn) toggleWishlist();  
+                                else {
+                                    navigate('/userLogin', {state: { from: location }});
+                                    // toggleWishlist();
+                                } 
+                            }}
                             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex items-center"
                         >
                             <i className="fas fa-heart mr-2"></i> Add to WishList
@@ -253,7 +261,12 @@ export default function ProductPage({ isLoggedIn, user }) {
                             </button>
                         ) : (
                             <button
-                                onClick={() => { isLoggedIn ? toggleCart() : navigate('/userLogin') }}
+                                onClick={() => { if(isLoggedIn) toggleCart();  
+                                else {
+                                    navigate('/userLogin', {state: { from: location }});
+                                    // toggleWishlist();
+                                } 
+                            }}
                                 className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
                             >
                                 <i className="fas fa-shopping-cart mr-2"></i> Add to Cart
@@ -263,10 +276,10 @@ export default function ProductPage({ isLoggedIn, user }) {
 
                     {product.SellerID && <button
                         onClick={() => {
-                            const selectedIds = [product.SellerInventoryID]
+                            const selectedIds = [product.SellerInventoryID];
                             isLoggedIn ?
                             navigate(`/orderProduct`, {state: {SellerInventoryIDs: selectedIds}})
-                            : navigate('/userLogin');
+                            : navigate('/userLogin', { state: { from: { pathname: '/orderProduct', state: {SellerInventoryIDs: selectedIds }} } });
                         }}
                         className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
                     >

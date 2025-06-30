@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
 import SellerRegister from './Components/SellerRegister';
-import HomePage from './Components/HomePage';
+import HomePage from './pages/HomePage';
 import SellerLogin from './Components/SellerLogin';
 import SellerDashboard from './Components/SellerDashboard';
 import CustomerLogin from './Components/CustomerLogin';
@@ -20,14 +20,14 @@ import AllProductsList from './Components/AllProductsList';
 import CustomerDashboard from './Components/CustomerDashboard';
 import UserHomePage from './Components/UserHomePage';
 import HeaderMenu from './Components/HeaderMenu';
-import UserLogin from './Components/UserLogin';
+import UserLogin from './pages/UserLogin';
 import ProductSearch from './Components/ProductSearch';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import ProductList from './Components/ProductList';
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import Cart from './Components/Cart';
-import Wishlist from './Components/Wishlist';
+import Cart from './pages/Cart';
+import Wishlist from './pages/Wishlist';
 import ProductPage from './Components/ProductPage';
 import OrderPage from './Components/OrderPage';
 import CustomerList from './pages/CustomerList';
@@ -57,6 +57,13 @@ function App() {
     checkLogin();
   }, [isLoggedIn]);
 
+  const PrivateRoute = ({children, isLoggedIn}) => {
+    const location = useLocation();
+    console.log(location);
+    if(!isLoggedIn && location.pathname === '/cart') toast.info("Please login to access your cart");
+    return isLoggedIn ? children : (<Navigate to='/userLogin' state={{ from: location }} replace />)
+  }
+
   return (
     <Router>
       <ToastContainer
@@ -75,10 +82,10 @@ function App() {
 
           {/* login paths */}
           <Route path='/userLogin' element={<UserLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          <Route path='/sellerLog' element={<SellerLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
+          {/* <Route path='/sellerLog' element={<SellerLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           {isLoggedIn ? <Route path='/customerLog' element={<HomePage />} />
             : <Route path='/customerLog' element={<CustomerLogin />} />
-          }
+          } */}
           {/* <Route path='/adminLog' element={<AdminLogin />} /> */}
           <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/allSellerDetails' element={<SellerList />} />
@@ -86,11 +93,11 @@ function App() {
           
           <Route path='/allCustomers' element={<CustomerList />} />
 
-          <Route path='/adminLog' element={<AdminLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
+          {/* <Route path='/adminLog' element={<AdminLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} /> */}
           <Route path='/adminDash' element={<AdminDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
           <Route path='/adminList' element={<AdminDetails />} />
           <Route path='/modAdmin' element={<ModifyAdmin />} />
-          <Route path='/whmlog' element={<WHMlogin />} />
+          {/* <Route path='/whmlog' element={<WHMlogin />} /> */}
 
           {/* DashBoards */}
           <Route path='/adminDash' element={<AdminDashboard />} />
@@ -110,7 +117,11 @@ function App() {
           <Route path='/searchProduct' element={<ProductSearch />} />
           <Route path="/find/:searchedProduct" element={<ProductList />} />
           <Route path="/visit/:productId" element={<ProductPage isLoggedIn={isLoggedIn} user={user} />} />
-          <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />} />
+          <Route path='/cart' element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <Cart isLoggedIn={isLoggedIn} user={user} />
+            </PrivateRoute>} 
+          />
           <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
           <Route path="/orderProduct" element={<OrderPage isLoggedIn={isLoggedIn} user={user} />} />
         </Routes>

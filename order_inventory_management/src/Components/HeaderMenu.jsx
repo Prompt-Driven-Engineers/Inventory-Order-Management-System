@@ -74,14 +74,7 @@ export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
                     {(user?.role !== 'Admin' && user?.role !== 'Seller') && (
                         <>
                             <button
-                                onClick={() => {
-                                    if (isLoggedIn) {
-                                        handleNavigate('/cart');
-                                    } else {
-                                        handleNavigate('/userLogin');
-                                        toast.info("Please login to access your cart");
-                                    }
-                                }}
+                                onClick={() => { handleNavigate('/cart'); }}
                                 className="flex items-center bg-blue-500 text-white px-3 py-2 font-bold rounded-md hover:bg-blue-600 transition-all duration-300"
                             >
                                 <ShoppingCartIcon className="h-5 w-5 mr-1" />
