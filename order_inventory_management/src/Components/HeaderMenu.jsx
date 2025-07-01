@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     ShoppingCartIcon,
@@ -7,10 +6,8 @@ import {
     ArchiveBoxIcon
 } from '@heroicons/react/24/solid';
 import SearchBar from './SearchBar';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-export default function HeaderMenu({ isLoggedIn, user, isVendorLoggedIn }) {
+export default function HeaderMenu({ isLoggedIn, user }) {
 
     const navigate = useNavigate();
     const location = useLocation();

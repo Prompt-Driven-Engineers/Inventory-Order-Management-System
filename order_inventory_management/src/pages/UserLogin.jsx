@@ -9,7 +9,8 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
     const [activeTab, setActiveTab] = useState('customer');
     const [errors, setErrors] = useState({});
     const location = useLocation();
-    const from = `${location.state?.from?.pathname}${location.state?.from?.search || ''}`;
+    const from = `${location.state?.from?.pathname || ''}${location.state?.from?.search || ''}` || null;
+    const redirectState = location.state?.from?.state || {};
 
     const [showPassword, setShowPassword] = useState(false);
 
@@ -66,7 +67,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 } else {
                     setIsLoggedIn(true);
                     console.log(from);
-                    if(from) navigate(from, { replace: true });
+                    if(from) navigate(from, { replace: true, state: redirectState });
                     else navigate(`/customerDash`, { replace: true });
                     toast.success("Login successful!");
                 }
@@ -91,7 +92,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                     toast.error(result.error || 'Something went wrong')
                 } else {
                     setIsLoggedIn(true);
-                    if(from) navigate(from, { replace: true });
+                    if(from) navigate(from, { replace: true, state: redirectState });
                     else navigate(`/sellerDash`, { replace: true });
                     toast.success("Login successful!");
                 }
@@ -155,8 +156,7 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                 toast.error(result.error || 'Something went wrong')
             } else {
                 setIsLoggedIn(true);
-                console.log(from);
-                if(from) navigate(from, { replace: true });
+                if(from) navigate(from, { replace: true, state: redirectState });
                 else navigate(`/adminDash`, { replace: true });
                 toast.success("Login successful!");
             }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function ProductPage({ isLoggedIn, user }) {
     const { productId } = useParams();
@@ -240,8 +241,8 @@ export default function ProductPage({ isLoggedIn, user }) {
                             onClick={() => { 
                                 if(isLoggedIn) toggleWishlist();  
                                 else {
+                                    toast.info('Please login first to a add product');
                                     navigate('/userLogin', {state: { from: location }});
-                                    // toggleWishlist();
                                 } 
                             }}
                             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex items-center"
@@ -263,8 +264,8 @@ export default function ProductPage({ isLoggedIn, user }) {
                             <button
                                 onClick={() => { if(isLoggedIn) toggleCart();  
                                 else {
+                                    toast.info('Please login first to add a product');
                                     navigate('/userLogin', {state: { from: location }});
-                                    // toggleWishlist();
                                 } 
                             }}
                                 className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
@@ -277,9 +278,13 @@ export default function ProductPage({ isLoggedIn, user }) {
                     {product.SellerID && <button
                         onClick={() => {
                             const selectedIds = [product.SellerInventoryID];
-                            isLoggedIn ?
-                            navigate(`/orderProduct`, {state: {SellerInventoryIDs: selectedIds}})
-                            : navigate('/userLogin', { state: { from: { pathname: '/orderProduct', state: {SellerInventoryIDs: selectedIds }} } });
+                            if(isLoggedIn) navigate(`/orderProduct`, {state: {SellerInventoryIDs: selectedIds}})
+                            else {
+                                toast.info('Please login to buy a product');
+                                navigate('/userLogin', { 
+                                    state: { from: { pathname: '/orderProduct', state: {SellerInventoryIDs: selectedIds }} } 
+                                });
+                            }   
                         }}
                         className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all flex items-center"
                     >

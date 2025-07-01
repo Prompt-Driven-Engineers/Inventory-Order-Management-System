@@ -49,7 +49,6 @@ const checkAuth = (req, res) => {
     }
 }; 
 
-// /routes/auth.js (or wherever you define auth routes)
 const handleLogout = (req, res) => {
     res.clearCookie('token', {
       httpOnly: true,

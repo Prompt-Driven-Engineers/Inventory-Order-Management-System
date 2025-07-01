@@ -31,14 +31,14 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
         axios.get('http://localhost:8000/customers/getOrderedProducts', {
             withCredentials: true
         })
-        .then((res) => {
-            setOrderedProducts(res.data || []);
-        })
-        .catch((err) => {
-            console.error("Error fetching orders:", err);
-            setOrderedProducts([]);
-            setError("Failed to load order details.");
-        });
+            .then((res) => {
+                setOrderedProducts(res.data || []);
+            })
+            .catch((err) => {
+                console.error("Error fetching orders:", err);
+                setOrderedProducts([]);
+                setError("Failed to load order details.");
+            });
     }, []);
 
     const deliveredOrders = orderedProducts.filter(order => order.OrderStatus === "Delivered");
@@ -46,52 +46,52 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
 
     const handleCancelOrder = (orderId) => {
         if (!orderId) return;
-      
+
         // Dismiss any existing confirmation toast if needed
         toast.dismiss();
-      
+
         const toastId = toast(
-          ({ closeToast }) => (
-            <div className="space-y-2">
-              <p className="text-sm text-gray-800">Are you sure you want to cancel this order?</p>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    // Call cancel logic
-                    confirmCancel(orderId);
-                    toast.dismiss(toastId); // Close the toast
-                  }}
-                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => {
-                    toast.dismiss(toastId); // Just close
-                  }}
-                  className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          ),
-          {
-            autoClose: false,
-            position: "top-center",
-          }
+            ({ closeToast }) => (
+                <div className="space-y-2">
+                    <p className="text-sm text-gray-800">Are you sure you want to cancel this order?</p>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => {
+                                // Call cancel logic
+                                confirmCancel(orderId);
+                                toast.dismiss(toastId); // Close the toast
+                            }}
+                            className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={() => {
+                                toast.dismiss(toastId); // Just close
+                            }}
+                            className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                        >
+                            No
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                autoClose: false,
+                position: "top-center",
+            }
         );
-      };
-      
-      const confirmCancel = (orderId) => {
-        axios.put(`http://localhost:8000/customers/getOrderedProducts/${orderId}`, {}, { withCredentials: true})
-        .then((res) => {
-            toast.success("Order cancelled");
-        })
-        .catch((err) => {
-            toast.error("Error in cancelling order");
-        })
-      };
+    };
+
+    const confirmCancel = (orderId) => {
+        axios.put(`http://localhost:8000/customers/getOrderedProducts/${orderId}`, {}, { withCredentials: true })
+            .then((res) => {
+                toast.success("Order cancelled");
+            })
+            .catch((err) => {
+                toast.error("Error in cancelling order");
+            })
+    };
 
     if (error) {
         return (
@@ -116,33 +116,33 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
             {/* Sidebar */}
             <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
                 {customer ? (
-                <div className="space-y-4">
-                    <p className="text-gray-600"><strong>Name:</strong> {customer.name}</p>
-                    <p className="text-gray-600"><strong>Email:</strong> {customer.email}</p>
-                    <p className="text-gray-600"><strong>Phone:</strong> {customer.phone}</p>
-                    <p className="text-gray-600"><strong>Subscription:</strong> {customer.SubscriptionStatus}</p>
-                    <p className="text-gray-600"><strong>Points:</strong> {customer.Points}</p>
-                    <p className="text-gray-600"><strong>Total Orders:</strong> {customer.TotalOrders}</p>
-                    <p className="text-gray-600"><strong>Account Status:</strong>
-                        {customer.Status === 'Active' ? <span className="text-green-500"> {customer.Status}</span>
-                        : <span className="text-red-500"> {customer.Status}</span>}  
-                    </p>
+                    <div className="space-y-4">
+                        <p className="text-gray-600"><strong>Name:</strong> {customer.name}</p>
+                        <p className="text-gray-600"><strong>Email:</strong> {customer.email}</p>
+                        <p className="text-gray-600"><strong>Phone:</strong> {customer.phone}</p>
+                        <p className="text-gray-600"><strong>Subscription:</strong> {customer.SubscriptionStatus}</p>
+                        <p className="text-gray-600"><strong>Points:</strong> {customer.Points}</p>
+                        <p className="text-gray-600"><strong>Total Orders:</strong> {customer.TotalOrders}</p>
+                        <p className="text-gray-600"><strong>Account Status:</strong>
+                            {customer.Status === 'Active' ? <span className="text-green-500"> {customer.Status}</span>
+                                : <span className="text-red-500"> {customer.Status}</span>}
+                        </p>
 
-                    {address && (
-                        <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">
-                            <h3 className="text-md font-semibold text-gray-700 mb-2">Address</h3>
-                            <p className="text-gray-600">{address.Street}, {address.City}</p>
-                            <p className="text-gray-600">{address.State}, {address.Country}</p>
-                            <p className="text-gray-600">{address.Zip}</p>
-                            <p className="text-gray-600 italic">Landmark: {address.Landmark}</p>
-                        </div>
-                    )}
-                </div>
+                        {address && (
+                            <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">
+                                <h3 className="text-md font-semibold text-gray-700 mb-2">Address</h3>
+                                <p className="text-gray-600">{address.Street}, {address.City}</p>
+                                <p className="text-gray-600">{address.State}, {address.Country}</p>
+                                <p className="text-gray-600">{address.Zip}</p>
+                                <p className="text-gray-600 italic">Landmark: {address.Landmark}</p>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <p>Loading seller details...</p> // ✅ Prevents error when seller is null
                 )}
             </LeftSidebar>
-            
+
             {/* Main Content */}
             <div className="ml-0 sm:ml-[25%] flex-1 p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome, {customer.name}</h1>
@@ -205,13 +205,13 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
                                                     <p className="text-sm text-gray-500">Total: ₹{order.TotalAmount}</p>
                                                     <p className="text-sm text-gray-500">Payment: {order.PaymentMethod}</p>
                                                 </div>
-                                                {(order.OrderStatus === "Pending" || order.OrderStatus === "Processing") 
-                                                && <button
-                                                    onClick={() => handleCancelOrder(order.OrderID)}
-                                                    className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded hover:bg-red-200 transition"
-                                                >
-                                                    Cancel
-                                                </button>}
+                                                {(order.OrderStatus === "Pending" || order.OrderStatus === "Processing")
+                                                    && <button
+                                                        onClick={() => handleCancelOrder(order.OrderID)}
+                                                        className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded hover:bg-red-200 transition"
+                                                    >
+                                                        Cancel
+                                                    </button>}
                                             </div>
 
                                             <div className="flex flex-wrap gap-4">

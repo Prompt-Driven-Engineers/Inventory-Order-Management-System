@@ -18,7 +18,7 @@ export const handleLogout = async (setIsLoggedIn, setUser, navigate) => {
     await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
     setIsLoggedIn(false);
     setUser(null);
-    navigate('/', { replace: true });
+    window.location.href = '/userLogin';
   } catch (err) {
     console.error('Logout failed:', err);
   }
