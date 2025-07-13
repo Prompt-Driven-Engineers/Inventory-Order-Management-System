@@ -119,23 +119,23 @@ Feel free to extend or customize it as per your needs.
 ### 🏠 Homepage
 ![Homepage](https://github.com/user-attachments/assets/558cd427-da64-4f5e-8e3f-32ed3238e1be)
 
-### 🛍️ Seller Dashboard
-![Seller Dashboard](https://github.com/user-attachments/assets/9ae03798-c6ed-46d5-9b09-0c0acb232601)
+### 🛍️ Product Search / Listing
+![Product Search / Listing](https://github.com/user-attachments/assets/9ae03798-c6ed-46d5-9b09-0c0acb232601)
 
-### 📦 Inventory Management
-![Inventory Management](https://github.com/user-attachments/assets/c5c20014-ec2e-42f7-8221-98515faa2b70)
+### 📦 Product Details
+![Product Details](https://github.com/user-attachments/assets/c5c20014-ec2e-42f7-8221-98515faa2b70)
 
-### 🛒 Product Details
-![Product Details](https://github.com/user-attachments/assets/7ce64dcb-8b12-403b-9949-6c44dc164a48)
-
-### 🧾 Order Management
-![Order Management](https://github.com/user-attachments/assets/f3f52c5a-2eec-4011-abd2-fa95b669f95b)
+### ⚙️ Registration
+![Registration](https://github.com/user-attachments/assets/2e9d3552-e70d-4885-968d-f3032e38bd86)
 
 ### 🔍 Product Search / Listing
-![Product Listing](https://github.com/user-attachments/assets/cfb38ed1-5be0-4774-8a02-c8fbf33cbad3)
+![Login](https://github.com/user-attachments/assets/cfb38ed1-5be0-4774-8a02-c8fbf33cbad3)
 
-### ⚙️ Admin Panel
-![Admin Panel](https://github.com/user-attachments/assets/2e9d3552-e70d-4885-968d-f3032e38bd86)
+### 🧾 User Dashboard
+![User Dashboard](https://github.com/user-attachments/assets/f3f52c5a-2eec-4011-abd2-fa95b669f95b)
 
-### 👤 User Wishlist / Cart View
-![Wishlist / Cart](https://github.com/user-attachments/assets/5cb7b3c4-8a90-49cb-80c9-d757a93fd276)
+### 🛒 Wishlist View
+![Wishlist View](https://github.com/user-attachments/assets/7ce64dcb-8b12-403b-9949-6c44dc164a48)
+
+### 👤 Order
+![Order](https://github.com/user-attachments/assets/5cb7b3c4-8a90-49cb-80c9-d757a93fd276)
