@@ -72,6 +72,56 @@ root/
 ```bash
 mysql -u root -p inventory_db < database/inventory_db_schema.sql
 ```
+---
+
+## 🔐 Admin Setup Instructions (Important)
+
+To enhance security, the **initial Super Admin** must be added manually through the database.  
+This ensures top-level access is never exposed through public registration.
+
+---
+
+### 🛠️ Steps to Add Super Admin Manually:
+
+1. **Insert into `users` table**  
+   Add user details like name, email, and a securely hashed password.
+
+2. **Get the generated `userID`**
+
+3. **Use that `userID` to insert into the following tables:**
+
+   - ### 🔹 `admins`
+     Must include a unique `AdminID` that follows this **exact format**:
+
+     ```
+     ADM22KD80AH
+     ```
+
+     ✅ Format rules:
+     - Exactly **11 characters**
+     - Begins with `ADM`
+     - Followed by:
+       - 2 digits
+       - 2 uppercase letters
+       - 2 digits
+       - 2 uppercase letters  
+     ✅ Example: `ADM23XY45AZ`
+
+   - ### 🔹 `adminsPasswords`
+     - Store the hashed password and link it to the `userID`
+
+   - ### 🔹 `address`
+     - Optional but recommended for admin profile completion
+
+   - ### 🔹 `usertypes`
+     - Assign the user type as `Admin` (based on your schema)
+
+---
+
+> 🔐 Only the **first Super Admin** must be created manually.  
+> After that, Super Admins can log in and use the platform to:
+> - Approve sellers
+> - Register other admins (e.g., Seller Admins, Customer Support roles)
 
 ---
 
