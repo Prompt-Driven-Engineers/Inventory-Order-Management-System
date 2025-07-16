@@ -1,9 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import {useNavigate } from 'react-router-dom';
+import { UserContext } from '../Context/UserContext';
 
-export default function Wishlist({isLoggedIn, user}) {
+export default function Wishlist() {
     const [products, setProducts] = useState([]);
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
+    const { isLoggedIn, user } = useContext(UserContext);
 
     const fetchWishlist = async() => {
         if (!user || user.role !== 'Customer') return; // Only fetch for Customers

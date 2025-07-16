@@ -6,12 +6,14 @@ import LeftSidebar from "./LeftSidebar";
 import { getFirstImage } from "../functions/func";
 import { showConfirmToast } from "./ShowConfirmToast";
 import { toast } from "react-toastify";
+import { UserContext } from "../Context/UserContext";
 
-export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
+export default function SellerDashboard() {
     const navigate = useNavigate();
     const [seller, setSeller] = useState(null);
     const [stock, setStock] = useState([]);
     const [soldProducts, setSoldProducts] = useState([]);
+    const { isLoggedIn, setUser, setIsLoggedIn } = useContext(UserContext);
 
     useEffect(() => {
         axios.get(`http://localhost:8000/sellers/sellerDetails`, {
@@ -73,7 +75,7 @@ export default function SellerDashboard({isLoggedIn, setUser, setIsLoggedIn}) {
     return (
         <div className="flex min-h-screen">
             {/* Left Side bar */}
-            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
+            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} isLoggedIn={isLoggedIn}>
                 {seller ? (
                 <div className="space-y-4">
                     <p className="text-gray-600"><strong>Name:</strong> {seller.name}</p>

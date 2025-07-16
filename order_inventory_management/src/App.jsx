@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate, Outlet } from 'react-router-dom';
 import './App.css';
 import SellerRegister from './Components/SellerRegister';
-import HomePage from './pages/HomePage';
-import SellerLogin from './Components/SellerLogin';
 import SellerDashboard from './Components/SellerDashboard';
 import CustomerRegister from './Components/CustomerRegister';
 import AddProduct from './Components/AddProductPage';
@@ -32,28 +30,39 @@ import OrdersPage from './Components/OrdersPage';
 import SellerOrdersPage from './pages/SellerOrdersPage';
 import ReOrderList from './Components/ReOrderList';
 import SellsDashboard from './pages/SellsDashboard';
+import { UserContext } from './Context/UserContext';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
+  const [checking, setChecking] = useState(true);
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/auth/check-auth', { withCredentials: true });
+        const res = await axios.get("http://localhost:8000/auth/check-auth", { withCredentials: true });
         if (res.data.isLoggedIn) {
           setIsLoggedIn(true);
           setUser(res.data.user);
+        } else {
+          setIsLoggedIn(false);
+          setUser(null);
         }
-      } catch (err) {
+      } catch {
         setIsLoggedIn(false);
         setUser(null);
+      } finally {
+        setChecking(false);
       }
     };
+
     checkLogin();
   }, [isLoggedIn]);
 
-  const PrivateRoute = ({ isLoggedIn }) => {
+  if (checking) return <p>Loading...</p>;
+
+  const PrivateRoute = () => {
     const location = useLocation();
     useEffect(() => {
       if (!isLoggedIn && location.pathname === '/cart') toast.info('Please login to access your cart');
@@ -64,73 +73,75 @@ function App() {
     ) : (
       <Navigate to="/userLogin" replace state={{ from: location }} />
     );
-  }
+  };
 
   return (
     <Router>
-      <ToastContainer
-        limit={3}
-        autoClose={3000}
-      />
-      <HeaderMenu isLoggedIn={isLoggedIn} user={user} setUser={setUser} setIsLoggedIn={setIsLoggedIn} />
-      <div className='pt-[64px]'>
-        <Routes>
-          {/* ------------------------------ General paths ------------------------------ */}
-          {/* <Route path='/advanceHome' element={<HomePage />} /> */}
-          <Route path='/' element={<UserHomePage />} />
-          <Route path="/find/:searchedProduct" element={<ProductList />} />
-          <Route path="/visit/:productId" element={<ProductPage isLoggedIn={isLoggedIn} user={user} />} />
+      <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser }}>
+        <ToastContainer
+          limit={3}
+          autoClose={3000}
+        />
+        <HeaderMenu />
+        <div className='pt-[64px]'>
+          <Routes>
+            {/* ------------------------------ General paths ------------------------------ */}
+            {/* <Route path='/advanceHome' element={<HomePage />} /> */}
+            <Route path='/' element={<UserHomePage />} />
+            <Route path="/find/:searchedProduct" element={<ProductList />} />
+            <Route path="/visit/:productId" element={<ProductPage />} />
 
-          {/* ------------------------------ Register paths ------------------------------ */}
-          <Route path='/sellerReg' element={<SellerRegister />} />
-          <Route path='/customerReg' element={<CustomerRegister />} />
-          <Route path='/adminReg' element={<AdminRegistration />} />
+            {/* ------------------------------ Register paths ------------------------------ */}
+            <Route path='/sellerReg' element={<SellerRegister />} />
+            <Route path='/customerReg' element={<CustomerRegister />} />
+            <Route path='/adminReg' element={<AdminRegistration />} />
 
-          {/* ------------------------------ Login paths ------------------------------ */}
-          <Route path='/userLogin' element={<UserLogin setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-          {/* <Route path='/whmlog' element={<WHMlogin />} /> */}
+            {/* ------------------------------ Login paths ------------------------------ */}
+            <Route path='/userLogin' element={<UserLogin />} />
+            {/* <Route path='/whmlog' element={<WHMlogin />} /> */}
 
-          {/* Protected routes */}
-          <Route element={<PrivateRoute isLoggedIn={isLoggedIn} />}>
+            {/* Protected routes */}
+            <Route element={<PrivateRoute />}>
 
-            {/* ------------------------------ DashBoards ------------------------------ */}
-            <Route path='/adminDash' element={<AdminDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-            <Route path='/sellerDash' element={<SellerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-            <Route path='/customerDash' element={<CustomerDashboard isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} setUser={setUser} />} />
-            {/* <Route path='/whmDash' element={<WHMDashBoard />} /> */}
+              {/* ------------------------------ DashBoards ------------------------------ */}
+              <Route path='/adminDash' element={<AdminDashboard />} />
+              <Route path='/sellerDash' element={<SellerDashboard />} />
+              <Route path='/customerDash' element={<CustomerDashboard />} />
+              {/* <Route path='/whmDash' element={<WHMDashBoard />} /> */}
 
-            {/* ------------------------------ User actions  ------------------------------*/}
-            <Route path='/cart' element={<Cart isLoggedIn={isLoggedIn} user={user} />}/>
-            <Route path='/wishlist' element={<Wishlist isLoggedIn={isLoggedIn} user={user} />} />
-            <Route path="/orderProduct" element={<OrderPage isLoggedIn={isLoggedIn} user={user} />} />
-            <Route path='/ordersPage' element={<OrdersPage />} />
+              {/* ------------------------------ User actions  ------------------------------*/}
+              <Route path='/cart' element={<Cart />} />
+              <Route path='/wishlist' element={<Wishlist />} />
+              <Route path="/orderProduct" element={<OrderPage />} />
+              <Route path='/ordersPage' element={<OrdersPage />} />
 
-            {/* ------------------------------ Seller actions ------------------------------ */}
-            <Route path='/searchProduct' element={<ProductSearch />} />     {/* Search product to add */}
-            <Route path='/addProduct' element={<AddProduct />} />
-            <Route path='/sellerOrders' element={<SellerOrdersPage/>} />
+              {/* ------------------------------ Seller actions ------------------------------ */}
+              <Route path='/searchProduct' element={<ProductSearch />} />     {/* Search product to add */}
+              <Route path='/addProduct' element={<AddProduct />} />
+              <Route path='/sellerOrders' element={<SellerOrdersPage />} />
 
-            {/* ------------------------------ Admin actions ------------------------------ */}
-            {/* Super Admin access */}
-            <Route path='/adminList' element={<AdminDetails />} />
-            <Route path='/modAdmin' element={<ModifyAdmin />} />
+              {/* ------------------------------ Admin actions ------------------------------ */}
+              {/* Super Admin access */}
+              <Route path='/adminList' element={<AdminDetails />} />
+              <Route path='/modAdmin' element={<ModifyAdmin />} />
 
-            {/* Seller Admin access */}
-            <Route path='/allSellerDetails' element={<SellerList />} />
-            <Route path='/pendingSellers' element={<PendingSellersList />} />
-            <Route path='/sellsList' element={<SellsDashboard />} />
-            <Route path='/sellerInventory' element={<SellerInventory />} />
-            
-            {/* Customer Support access */}
-            <Route path='/allCustomers' element={<CustomerList />} />
+              {/* Seller Admin access */}
+              <Route path='/allSellerDetails' element={<SellerList />} />
+              <Route path='/pendingSellers' element={<PendingSellersList />} />
+              <Route path='/sellsList' element={<SellsDashboard />} />
+              <Route path='/sellerInventory' element={<SellerInventory />} />
 
-            {/* ------------------------------ other paths ------------------------------ */}
-            <Route path='/allProduct' element={<AllProductsList />} />
-            <Route path='/reorderList' element={<ReOrderList />} />
+              {/* Customer Support access */}
+              <Route path='/allCustomers' element={<CustomerList />} />
 
-          </Route>
-        </Routes>
-      </div>
+              {/* ------------------------------ other paths ------------------------------ */}
+              <Route path='/allProduct' element={<AllProductsList />} />
+              <Route path='/reorderList' element={<ReOrderList />} />
+
+            </Route>
+          </Routes>
+        </div>
+      </UserContext.Provider>
     </Router>
   );
 }

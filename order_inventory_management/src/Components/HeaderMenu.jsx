@@ -6,11 +6,14 @@ import {
     ArchiveBoxIcon
 } from '@heroicons/react/24/solid';
 import SearchBar from './SearchBar';
+import { useContext } from 'react';
+import { UserContext } from '../Context/UserContext';
 
-export default function HeaderMenu({ isLoggedIn, user }) {
+export default function HeaderMenu() {
 
     const navigate = useNavigate();
     const location = useLocation();
+    const { isLoggedIn, user } = useContext(UserContext);
 
     const handleNavigate = (path) => {
         if(location.pathname !== path) navigate(path);

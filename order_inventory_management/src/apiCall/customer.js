@@ -1,5 +1,4 @@
 import axios from "axios";
-import { replace } from "react-router-dom";
 
 export const fetchCustomer = async () => {
   try {
@@ -13,7 +12,7 @@ export const fetchCustomer = async () => {
   }
 };
 
-export const handleLogout = async (setIsLoggedIn, setUser, navigate) => {
+export const handleLogout = async (setIsLoggedIn, setUser) => {
   try {
     await axios.post('http://localhost:8000/auth/logout', {}, { withCredentials: true });
     setIsLoggedIn(false);

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { UserContext } from '../Context/UserContext';
 
-export default function ProductPage({ isLoggedIn, user }) {
+export default function ProductPage() {
     const { productId } = useParams();
     const [searchParams] = useSearchParams();
     const type = searchParams.get('type');
@@ -10,6 +11,7 @@ export default function ProductPage({ isLoggedIn, user }) {
     const navigate = useNavigate();
     const [wishlisted, setWishlisted] = useState(false);
     const [carted, setCarted] = useState(false);
+    const { isLoggedIn, user } = useContext(UserContext);
 
     const location = useLocation();
 

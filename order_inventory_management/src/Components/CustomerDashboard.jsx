@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ShoppingBag, Heart, PlusCircle, LogOut } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { formatOrderDate, getFirstImage } from "../functions/func";
 import { toast } from "react-toastify";
 import LeftSidebar from "./LeftSidebar";
+import { UserContext } from "../Context/UserContext";
 
-export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }) {
+export default function CustomerDashboard() {
     const navigate = useNavigate();
     const [customer, setCustomer] = useState(null);
     const [error, setError] = useState(null);
     const [orderedProducts, setOrderedProducts] = useState([]);
+    const { setIsLoggedIn, isLoggedIn, setUser } = useContext(UserContext);
 
     useEffect(() => {
         axios.get(`http://localhost:8000/customers/customerDetails`, {
@@ -114,7 +116,7 @@ export default function CustomerDashboard({ setIsLoggedIn, isLoggedIn, setUser }
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
+            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} isLoggedIn={isLoggedIn}>
                 {customer ? (
                     <div className="space-y-4">
                         <p className="text-gray-600"><strong>Name:</strong> {customer.name}</p>

@@ -1,16 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { replace, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from 'react-toastify';
 import RoleSelector from '../Components/SlideHeader';
+import { UserContext } from '../Context/UserContext';
 
-export default function UserLogin({ setUser, setIsLoggedIn }) {
+export default function UserLogin() {
     // State to track which tab is active (default is 'customer')
     const [activeTab, setActiveTab] = useState('customer');
     const [errors, setErrors] = useState({});
     const location = useLocation();
     const from = `${location.state?.from?.pathname || ''}${location.state?.from?.search || ''}` || null;
     const redirectState = location.state?.from?.state || {};
+    const { setIsLoggedIn } = useContext(UserContext);
 
     const [showPassword, setShowPassword] = useState(false);
 
@@ -66,7 +68,6 @@ export default function UserLogin({ setUser, setIsLoggedIn }) {
                     toast.error(result.error || 'Something went wrong');
                 } else {
                     setIsLoggedIn(true);
-                    console.log(from);
                     if(from) navigate(from, { replace: true, state: redirectState });
                     else navigate(`/customerDash`, { replace: true });
                     toast.success("Login successful!");

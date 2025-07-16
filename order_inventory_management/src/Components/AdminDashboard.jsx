@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { PlusCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import LeftSidebar from "./LeftSidebar";
 import { fetchAdminDetails } from "../apiCall/admin";
+import { UserContext } from "../Context/UserContext";
 
-export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
+export default function AdminDashboard() {
     const navigate = useNavigate();
     const [admin, setAdmin] = useState(null);
+    const { isLoggedIn, setUser, setIsLoggedIn } = useContext(UserContext);
 
     useEffect(() => {
         fetchAdminDetails(setAdmin);
@@ -23,7 +25,7 @@ export default function AdminDashboard({ isLoggedIn, setUser, setIsLoggedIn }) {
     return (
         <div className="flex min-h-screen">
             {/* Left Sidebar */}
-            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} navigate={navigate} isLoggedIn={isLoggedIn}>
+            <LeftSidebar setIsLoggedIn={setIsLoggedIn} setUser={setUser} isLoggedIn={isLoggedIn}>
                 {admin ? (
                     <div className="space-y-4">
                         <p className="text-gray-600"><strong>Name:</strong> {admin.name}</p>

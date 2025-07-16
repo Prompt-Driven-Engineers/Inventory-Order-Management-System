@@ -1,7 +1,11 @@
 import { LogOut } from "lucide-react";
 import { handleLogout } from '../apiCall/customer';
+import { useContext } from "react";
+import { UserContext } from "../Context/UserContext";
 
-export default function LeftSidebar({children, setIsLoggedIn, setUser, navigate, isLoggedIn}) {
+export default function LeftSidebar({children, navigate }) {
+    const { isLoggedIn, setIsLoggedIn, setUser } = useContext(UserContext);
+
     return (
         <div className="fixed hidden sm:block w-1/4 min-h-[calc(100dvh-64px)] bg-white p-6 shadow-md flex flex-col justify-between">
             {children}

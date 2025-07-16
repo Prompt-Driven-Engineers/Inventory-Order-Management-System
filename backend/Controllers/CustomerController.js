@@ -104,7 +104,12 @@ const CustomerLogin = async (req, res) => {
         const token = setUser({ UserID, Email, Role: 'Customer' });
 
         // **Step 5: Set cookie and send response**
-        res.cookie("token", token);
+        res.cookie("token", token, {
+            httpOnly: true,         // 🔐 JS can't access (protects from XSS)
+            sameSite: "Strict",     // 🔐 Helps prevent CSRF
+            // maxAge: 60 * 60 * 1000  // Optional: 1 hour expiry
+        });
+
         res.status(200).json({ message: "Login successful", UserID });
 
     } catch (error) {

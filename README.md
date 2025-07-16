@@ -178,7 +178,7 @@ Feel free to extend or customize it as per your needs.
 ### ⚙️ Registration
 ![Registration](https://github.com/user-attachments/assets/2e9d3552-e70d-4885-968d-f3032e38bd86)
 
-### 🔍 Product Search / Listing
+### 🔍 Login
 ![Login](https://github.com/user-attachments/assets/cfb38ed1-5be0-4774-8a02-c8fbf33cbad3)
 
 ### 🧾 User Dashboard

@@ -1,14 +1,16 @@
-import {React, useState, useEffect} from 'react';
+import {React, useState, useEffect, useContext} from 'react';
 import {useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getFirstImage } from "../functions/func";
 import { fetchCustomer } from '../apiCall/customer';
+import { UserContext } from '../Context/UserContext';
 
-export default function Cart({isLoggedIn, user}) {
+export default function Cart() {
     const [products, setProducts] = useState([]);
     const navigate = useNavigate(); 
     const [customer, setCustomer] = useState();
+    const { isLoggedIn, user } = useContext(UserContext);
 
     const fetchCart = async () => {
         if (!user || user.role !== 'Customer') return; // Only fetch for Customers

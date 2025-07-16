@@ -52,12 +52,10 @@ const checkAuth = (req, res) => {
 const handleLogout = (req, res) => {
     res.clearCookie('token', {
       httpOnly: true,
-      secure: true,      // use true if you're on https
       sameSite: 'Strict' // or 'Lax' based on your setup
     });
     return res.json({ message: 'Logged out successfully' });
 };
-  
 
 module.exports = {
     setUser,

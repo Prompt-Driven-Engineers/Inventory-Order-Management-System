@@ -3,8 +3,9 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
 import { toast } from 'react-toastify';
 import { getFirstImage } from '../functions/func';
+import { UserContext } from '../Context/UserContext';
 
-export default function OrderPage({ isLoggedIn, user }) {
+export default function OrderPage() {
   const [orderedProducts, setOrderedProducts] = useState([]);
 
   const [oProducts, setOproducts] = useState([]);
@@ -12,6 +13,7 @@ export default function OrderPage({ isLoggedIn, user }) {
   const sellerInventoryIDs = location.state?.SellerInventoryIDs || [];
   const [customer, setCustomer] = useState();
   const navigate = useNavigate();
+  const { isLoggedIn, user } = useContext(UserContext);
 
   useEffect(() => {
     const fetchOrderedProducts = async () => {
